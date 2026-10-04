@@ -1,0 +1,121 @@
+<a routerLink="/" class="inline-block rounded-full py-1 text-sm text-destaque hover:text-onda">Voltar ao catálogo</a>
+
+<div class="mt-4">
+  @if (freq.loading()) {
+    <app-state-message kind="loading" heading="Carregando frequência" />
+  } @else {
+    @if (freq.error(); as message) {
+      <app-state-message kind="error" heading="Algo deu errado" [detail]="message" (retry)="freq.load(true)" />
+    } @else {
+      @if (item(); as f) {
+        <article>
+          <div class="relative isolate overflow-hidden rounded-onda border border-borda bg-superficie/60">
+            <div class="absolute inset-0 -z-10 opacity-70">
+              <app-wave-lines [lines]="isPlaying() ? 56 : 32" [amplitude]="amplitude()" [height]="220" />
+            </div>
+            <div class="px-6 py-12 sm:px-10 sm:py-16">
+              <p class="text-sm text-onda">{{ goalLabel() }} · {{ kindLabel() }}</p>
+              <h1 class="mt-2 font-titulo text-3xl font-semibold tracking-tight sm:text-4xl">{{ f.name }}</h1>
+              <p class="mt-4 max-w-xl text-texto/85">{{ f.description }}</p>
+            </div>
+          </div>
+
+          <dl class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div class="rounded-2xl border border-borda bg-superficie/80 px-4 py-3">
+              <dt class="text-xs text-suave">Tom base</dt>
+              <dd class="font-titulo text-lg">{{ f.hz }} Hz</dd>
+            </div>
+            <div class="rounded-2xl border border-borda bg-superficie/80 px-4 py-3">
+              <dt class="text-xs text-suave">Pulsação</dt>
+              <dd class="font-titulo text-lg">{{ f.beatHz ? f.beatHz + ' Hz' : 'Sem pulsação' }}</dd>
+            </div>
+            <div class="rounded-2xl border border-borda bg-superficie/80 px-4 py-3">
+              <dt class="text-xs text-suave">Duração</dt>
+              <dd class="font-titulo text-lg">{{ f.durationMin }} min</dd>
+            </div>
+            <div class="rounded-2xl border border-borda bg-superficie/80 px-4 py-3">
+              <dt class="text-xs text-suave">Tipo</dt>
+              <dd class="font-titulo text-lg">{{ kindLabel() }}</dd>
+            </div>
+          </dl>
+
+          <section class="mt-6 rounded-onda border border-borda bg-superficie/80 p-6" aria-label="Player">
+            <div class="flex flex-wrap items-center gap-4">
+              <button
+                type="button"
+                (click)="togglePlay()"
+                class="rounded-full bg-destaque px-6 py-3 font-medium text-fundo hover:bg-onda"
+              >
+                {{ isPlaying() ? 'Parar' : 'Ouvir agora' }}
+              </button>
+              <label class="flex items-center gap-3 text-sm text-suave">
+                Volume
+                <input
+                  type="range"
+                  min="0"
+                  max="0.6"
+                  step="0.01"
+                  [value]="audio.volume()"
+                  (input)="onVolume($event)"
+                  class="w-40 accent-destaque"
+                />
+              </label>
+              <button
+                type="button"
+                (click)="session.toggle(f.id)"
+                [attr.aria-pressed]="inSession()"
+                class="rounded-full border border-destaque/50 px-5 py-3 text-sm text-destaque hover:bg-destaque/10"
+              >
+                {{ inSession() ? 'Remover da sessão' : 'Adicionar à sessão' }}
+              </button>
+            </div>
+            @if (f.kind === 'binaural') {
+              <p class="mt-4 text-sm text-suave">Use fones de ouvido: cada ouvido recebe um tom diferente.</p>
+            }
+          </section>
+
+          <section class="mt-6">
+            <h2 class="font-titulo text-xl font-semibold">Pontos fortes</h2>
+            <ul class="mt-3 flex flex-wrap gap-2">
+              @for (b of f.benefits; track b) {
+                <li class="rounded-full border border-borda px-4 py-1.5 text-sm text-texto/90">{{ b }}</li>
+              } @empty {
+                <li class="text-sm text-suave">Ainda sem descrição de benefícios.</li>
+              }
+            </ul>
+          </section>
+
+          <section class="mt-8">
+            <h2 class="font-titulo text-xl font-semibold">Notas da comunidade</h2>
+            <div class="mt-3">
+              @if (community.loading()) {
+                <app-state-message kind="loading" heading="Carregando notas" />
+              } @else {
+                @if (community.error(); as message) {
+                  <app-state-message kind="error" heading="Notas indisponíveis" [detail]="message" (retry)="community.load(f.communityPostId)" />
+                } @else {
+                  <ul class="grid gap-3 sm:grid-cols-3">
+                    @for (n of community.notes(); track n.id) {
+                      <li class="rounded-2xl border border-borda bg-superficie/80 p-4 text-sm">
+                        <p class="line-clamp-4 text-texto/85">{{ n.body }}</p>
+                        <p class="mt-3 text-xs text-suave">{{ n.email }}</p>
+                      </li>
+                    } @empty {
+                      <li class="text-sm text-suave sm:col-span-3">Ninguém comentou esta frequência ainda.</li>
+                    }
+                  </ul>
+                }
+              }
+            </div>
+          </section>
+        </article>
+      } @else {
+        <app-state-message
+          kind="empty"
+          heading="Frequência não encontrada"
+          detail="O código na URL não existe no catálogo. Volte e escolha uma da lista."
+        />
+      }
+    }
+  }
+</div>

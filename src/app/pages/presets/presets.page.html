@@ -1,0 +1,142 @@
+<h1 class="font-titulo text-3xl font-semibold tracking-tight">Presets</h1>
+<p class="mt-2 max-w-xl text-suave">Combine frequências e guarde a mistura para usar de novo.</p>
+
+<section class="mt-6 grid gap-3 sm:grid-cols-3" aria-label="Resumo dos presets">
+  <app-stat-card label="Presets salvos" [value]="store.count()" />
+  <app-stat-card label="Presets ativos" [value]="store.activeCount()" />
+  <app-stat-card label="Minutos dos presets ativos" [value]="store.activeMinutes()" />
+</section>
+
+<div class="mt-10 grid gap-8 lg:grid-cols-2">
+  <section aria-labelledby="novo-preset">
+    <h2 id="novo-preset" class="font-titulo text-xl font-semibold">Novo preset</h2>
+
+    @if (freq.loading()) {
+      <div class="mt-4"><app-state-message kind="loading" heading="Carregando frequências" /></div>
+        } @else if (freq.error()) {
+      <app-state-message kind="error" heading="Algo deu errado" [detail]="freq.error() ?? ''" (retry)="freq.load(true)" />
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="submit()" class="mt-4 space-y-5 rounded-onda border border-borda bg-superficie/80 p-6" novalidate>
+        <div>
+          <label for="name" class="block text-sm text-suave">Nome do preset</label>
+          <input
+            id="name"
+            type="text"
+            formControlName="name"
+            autocomplete="off"
+            class="mt-1 w-full rounded-xl border bg-fundo px-4 py-2.5 text-texto focus:border-destaque focus:outline-none"
+            [class]="form.controls.name.touched && form.controls.name.invalid ? 'border-erro' : 'border-borda'"
+          />
+          @if (form.controls.name.touched && form.controls.name.errors; as errors) {
+            <p class="mt-1 text-sm text-erro" role="alert">
+              @if (errors['required']) {
+                Dê um nome ao preset.
+              } @else if (errors['minlength']) {
+                Use pelo menos 3 letras.
+              } @else {
+                Use no máximo 30 letras.
+              }
+            </p>
+          }
+        </div>
+
+        <div>
+          <label for="goal" class="block text-sm text-suave">Objetivo</label>
+          <select
+            id="goal"
+            formControlName="goal"
+            class="mt-1 w-full rounded-xl border border-borda bg-fundo px-4 py-2.5 text-texto focus:border-destaque focus:outline-none"
+          >
+            @for (g of goals; track g.value) {
+              <option [value]="g.value">{{ g.label }}</option>
+            }
+          </select>
+        </div>
+
+        <fieldset>
+          <legend class="text-sm text-suave">Frequências</legend>
+          <div class="mt-2 flex flex-wrap gap-2">
+            @for (f of freq.items(); track f.id) {
+              <button
+                type="button"
+                (click)="togglePick(f.id)"
+                [attr.aria-pressed]="isPicked(f.id)"
+                class="rounded-full border px-3 py-1.5 text-sm transition-colors"
+                [class]="
+                  isPicked(f.id)
+                    ? 'border-destaque bg-destaque/15 text-destaque'
+                    : 'border-borda text-suave hover:text-texto'
+                "
+              >
+                {{ f.name }}
+              </button>
+            }
+          </div>
+          @if (form.controls.frequencyIds.touched && form.controls.frequencyIds.invalid) {
+            <p class="mt-2 text-sm text-erro" role="alert">Escolha pelo menos uma frequência.</p>
+          }
+          <p class="mt-3 text-sm text-suave">
+            {{ pickedItems().length }} escolhidas · {{ pickedMinutes() }} min no total
+          </p>
+        </fieldset>
+
+        <button
+          type="submit"
+          [disabled]="form.invalid"
+          class="w-full rounded-full bg-destaque px-6 py-3 font-medium text-fundo transition-colors hover:bg-onda disabled:cursor-not-allowed disabled:bg-borda disabled:text-suave"
+        >
+          Salvar preset
+        </button>
+
+        @if (saved()) {
+          <p class="text-sm text-sucesso" role="status">Preset salvo. Ele já aparece na lista.</p>
+        }
+      </form>
+    }
+  </section>
+
+  <section aria-labelledby="meus-presets">
+    <h2 id="meus-presets" class="font-titulo text-xl font-semibold">Seus presets</h2>
+    <ul class="mt-4 space-y-3">
+      @for (p of store.presets(); track p.id) {
+        <li class="rounded-onda border bg-superficie/80 p-5" [class]="p.active ? 'border-destaque/60' : 'border-borda'">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <h3 class="font-titulo text-lg font-semibold">{{ p.name }}</h3>
+              <p class="text-sm text-onda">{{ goalLabels[p.goal] }}</p>
+            </div>
+            <span class="rounded-full px-3 py-1 text-xs" [class]="p.active ? 'bg-destaque/15 text-destaque' : 'bg-fundo text-suave'">
+              {{ p.active ? 'Ativo' : 'Pausado' }}
+            </span>
+          </div>
+          <p class="mt-2 text-sm text-suave">{{ namesOf(p.frequencyIds) }}</p>
+          <div class="mt-4 flex gap-2 text-sm">
+            <button
+              type="button"
+              (click)="store.toggleActive(p.id)"
+              class="rounded-full border border-destaque/50 px-4 py-1.5 text-destaque hover:bg-destaque/10"
+            >
+              {{ p.active ? 'Pausar' : 'Ativar' }}
+            </button>
+            <button
+              type="button"
+              (click)="store.remove(p.id)"
+              class="rounded-full border border-borda px-4 py-1.5 text-suave hover:border-erro hover:text-erro"
+            >
+              Excluir
+            </button>
+          </div>
+        </li>
+      } @empty {
+        <li>
+          <app-state-message
+            kind="empty"
+            heading="Nenhum preset ainda"
+            detail="Preencha o formulário ou monte uma sessão no catálogo e volte aqui."
+          />
+          <a routerLink="/" class="mt-3 inline-block text-sm text-destaque hover:text-onda">Ir ao catálogo</a>
+        </li>
+      }
+    </ul>
+  </section>
+</div>

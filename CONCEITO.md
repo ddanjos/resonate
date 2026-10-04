@@ -1,0 +1,41 @@
+# Conceito e ligação funcional: Resonate
+
+## 1. Capa escolhida
+
+- **Álbum:** Perfect Peace
+- **Artista:** sondae
+- **Imagem:** https://i.scdn.co/image/ab67616d0000b2737a18e6c7014695b2110c73e8
+
+A capa não aparece dentro do site, e o nome do álbum não foi usado como nome do projeto.
+
+## 2. Palavra-conceito
+
+**Ressonância** (ou frequência fluida)
+
+A capa mostra dezenas de linhas finas, paralelas e onduladas, que se curvam juntas sobre um fundo escuro e granulado. Uma forma azul luminosa se dobra sobre si mesma, como uma superfície vibrando. Lembra o desenho de uma onda sonora: várias camadas de uma mesma vibração, sem cortes bruscos. A sensação é de calma e foco.
+
+A palavra veio daí. Cada linha da capa é uma frequência, e o que se vê é o conjunto delas vibrando em harmonia. Ressonância é o que acontece quando uma vibração faz outra vibrar junto, e é essa ideia de "combinar frequências" que define o site.
+
+## 3. Ligação funcional
+
+> Escolhi esta capa porque ela fala de ressonância e frequências fluidas, e por isso meu site é um gerenciador de frequências para foco e relaxamento.
+
+A capa é feita de muitas linhas que formam uma só onda. O site transforma isso em interação: o usuário **combina várias frequências em uma sessão** e vê o conjunto se somar. A duração total, a classificação da sessão (curta, média ou longa) e a contagem de presets ativos mudam a cada clique. Os presets salvam combinações de frequências, e cada frequência pode ser ouvida de verdade, porque o som é gerado no navegador.
+
+Visualmente, as linhas onduladas da capa viraram o componente `wave-lines`, que muda de intensidade conforme o tom da frequência e quando o som está tocando.
+
+## 4. Uso de inteligência artificial
+
+**O que pedi à IA**
+
+- Conceitos abstratos que a capa poderia representar, a partir da minha descrição.
+- Ideias de funcionalidade que traduzissem ondas e frequências em interface.
+- Ajuda para estruturar o projeto Angular e escrever o código e a documentação.
+
+**O que decidi sozinho**
+
+- A palavra "Ressonância" e a ideia de um gerenciador de frequências para foco.
+- A paleta de cores, a tipografia e a forma, definidas em `tailwind.config.js` e em `docs/IDENTIDADE-VISUAL.md`.
+- A organização em componentes e o uso de signals e `computed`.
+
+> Antes de entregar: revise este texto com as suas palavras. No dia da apresentação, o que vale é o que você sabe explicar.
