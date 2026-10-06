@@ -4,7 +4,7 @@
 
 - **Álbum:** Perfect Peace
 - **Artista:** sondae
-- **Imagem:** resonate/docs/sondae_album.png
+- **Imagem:** ![Capa do álbum](docs/sondae_album.png)
 
 A capa não aparece dentro do site, e o nome do álbum não foi usado como nome do projeto.
 
