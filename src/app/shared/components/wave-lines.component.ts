@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
-/** Linhas onduladas decorativas. A quantidade e a intensidade mudam conforme os inputs. */
 @Component({
   selector: 'app-wave-lines',
   standalone: true,

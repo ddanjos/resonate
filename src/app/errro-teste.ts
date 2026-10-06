@@ -5,20 +5,20 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class TesteErroService {
-  private apiUrl: string = 'http://localhost:3000/api'; // Corrected: number converted to string
+  private apiUrl: string = 'http://localhost:3000/api';
 
-  constructor(private http: HttpClient) {} // Corrected: HttpClient imported
+  constructor(private http: HttpClient) {}
 
   public obterDados(): boolean {
-    let x = "texto"; // Corrected: variable name should not be a number
-    x = true; // Corrected: reassignment of type in TS
+    let x = "texto";
+    x = true;
 
-    const response = this.http.get(this.apiUrl); // Corrected: http method should be lowercase
-    return response; // Corrected: returning response instead of string
+    const response = this.http.get(this.apiUrl);
+    return response;
   }
 
   public funcaoQuebrada() {
-    console.log("faltando fechar parenteses e chaves"); // Corrected: added missing curly braces
+    console.log("faltando fechar parenteses e chaves");
   }
 }
 

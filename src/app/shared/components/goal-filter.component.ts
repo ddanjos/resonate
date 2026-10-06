@@ -3,7 +3,6 @@ import { Goal } from '../../core/models/frequency.model';
 
 export type GoalFilterValue = Goal | 'todos';
 
-/** Botões de filtro por objetivo. Avisa o pai quando o usuário escolhe um. */
 @Component({
   selector: 'app-goal-filter',
   standalone: true,

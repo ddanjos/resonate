@@ -10,7 +10,6 @@ import { WaveLinesComponent } from '../../shared/components/wave-lines.component
   template: `
     <section class="relative isolate overflow-hidden rounded-onda border border-borda bg-superficie/60">
       <div class="absolute inset-0 -z-10 opacity-60">
-        <!-- Onda quase reta: o sinal se perdeu -->
         <app-wave-lines [lines]="28" [amplitude]="6" [height]="260" />
       </div>
       <div class="px-6 py-20 text-center sm:py-28">

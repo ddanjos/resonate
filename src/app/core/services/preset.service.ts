@@ -1,30 +1,40 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Goal, Preset } from '../models/frequency.model';
+import { AudioEngine } from '../audio/audio-engine.service';
+import { Goal, Preset, frequencyDurationMinutes } from '../models/frequency.model';
 import { FrequencyService } from './frequency.service';
 
 const STORAGE_KEY = 'resonate.presets';
 
-/** Presets salvos pelo usuário. Contagens e totais são sempre calculados, nunca guardados. */
 @Injectable({ providedIn: 'root' })
 export class PresetService {
   private readonly frequencies = inject(FrequencyService);
+  private readonly audio = inject(AudioEngine);
 
   readonly presets = signal<Preset[]>(this.restore());
 
   readonly count = computed(() => this.presets().length);
-  readonly activeCount = computed(() => this.presets().filter((p) => p.active).length);
+  readonly activeCount = computed(() => {
+    const currentPresetId = this.audio.currentPresetId();
+    return this.audio.playing() && currentPresetId ? 1 : 0;
+  });
 
-  /** Minutos somados dos presets ativos. */
   readonly activeMinutes = computed(() => {
+    const currentPresetId = this.audio.currentPresetId();
+    if (!this.audio.playing() || !currentPresetId) return 0;
+
     const catalog = this.frequencies.items();
-    return this.presets()
-      .filter((p) => p.active)
-      .flatMap((p) => p.frequencyIds)
-      .reduce((total, id) => total + (catalog.find((f) => f.id === id)?.durationMin ?? 0), 0);
+    const preset = this.presets().find((item) => item.id === currentPresetId);
+    const durations = preset?.frequencyIds.map((id) => {
+      const frequency = catalog.find((item) => item.id === id);
+      return frequency ? frequencyDurationMinutes(frequency) : 0;
+    }) ?? [];
+    return this.audio.currentPlaybackMode() === 'simultaneous'
+      ? Math.max(0, ...durations)
+      : durations.reduce((total, duration) => total + duration, 0);
   });
 
   add(data: { name: string; goal: Goal; frequencyIds: string[] }): void {
-    const preset: Preset = { id: crypto.randomUUID(), active: true, ...data };
+    const preset: Preset = { id: crypto.randomUUID(), ...data };
     this.presets.update((list) => [preset, ...list]);
     this.save();
   }
@@ -34,23 +44,16 @@ export class PresetService {
     this.save();
   }
 
-  toggleActive(id: string): void {
-    this.presets.update((list) => list.map((p) => (p.id === id ? { ...p, active: !p.active } : p)));
-    this.save();
-  }
-
   private save(): void {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.presets()));
-    } catch {
-      /* armazenamento indisponível: o app continua funcionando em memória */
-    }
+    } catch {}
   }
 
   private restore(): Preset[] {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? (JSON.parse(raw) as Preset[]) : [];
+      return raw ? (JSON.parse(raw) as Preset[]).map((preset) => ({ ...preset, active: false })) : [];
     } catch {
       return [];
     }

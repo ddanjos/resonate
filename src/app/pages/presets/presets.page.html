@@ -96,27 +96,33 @@
   </section>
 
   <section aria-labelledby="meus-presets">
-    <h2 id="meus-presets" class="font-titulo text-xl font-semibold">Seus presets</h2>
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h2 id="meus-presets" class="font-titulo text-xl font-semibold">Seus presets</h2>
+        <p class="mt-1 text-sm text-suave">Modo ao tocar um preset</p>
+      </div>
+      <app-playback-mode [mode]="session.playbackMode()" (changed)="setPlaybackMode($event)" />
+    </div>
     <ul class="mt-4 space-y-3">
       @for (p of store.presets(); track p.id) {
-        <li class="rounded-onda border bg-superficie/80 p-5" [class]="p.active ? 'border-destaque/60' : 'border-borda'">
+        <li class="rounded-onda border bg-superficie/80 p-5" [class]="audio.currentPresetId() === p.id && audio.playing() ? 'border-destaque/60' : 'border-borda'">
           <div class="flex items-start justify-between gap-3">
             <div>
               <h3 class="font-titulo text-lg font-semibold">{{ p.name }}</h3>
-              <p class="text-sm text-onda">{{ goalLabels[p.goal] }}</p>
+              <p class="text-sm text-onda">{{ p.goal ? goalLabels[p.goal] : '' }}</p>
             </div>
-            <span class="rounded-full px-3 py-1 text-xs" [class]="p.active ? 'bg-destaque/15 text-destaque' : 'bg-fundo text-suave'">
-              {{ p.active ? 'Ativo' : 'Pausado' }}
+            <span class="rounded-full px-3 py-1 text-xs" [class]="audio.currentPresetId() === p.id && audio.playing() ? 'bg-destaque/15 text-destaque' : 'bg-fundo text-suave'">
+              {{ presetStatus(p) }}
             </span>
           </div>
           <p class="mt-2 text-sm text-suave">{{ namesOf(p.frequencyIds) }}</p>
           <div class="mt-4 flex gap-2 text-sm">
             <button
               type="button"
-              (click)="store.toggleActive(p.id)"
+              (click)="playPreset(p)"
               class="rounded-full border border-destaque/50 px-4 py-1.5 text-destaque hover:bg-destaque/10"
             >
-              {{ p.active ? 'Pausar' : 'Ativar' }}
+              {{ audio.currentPresetId() === p.id && audio.playing() ? (audio.paused() ? 'Retomar' : 'Pausar') : 'Ativar e tocar' }}
             </button>
             <button
               type="button"

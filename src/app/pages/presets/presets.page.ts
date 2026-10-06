@@ -3,14 +3,15 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { startWith } from 'rxjs';
-import { GOAL_LABELS, Goal } from '../../core/models/frequency.model';
+import { frequencyDurationMinutes, GOAL_LABELS, Goal, PlaybackMode, Preset } from '../../core/models/frequency.model';
+import { AudioEngine } from '../../core/audio/audio-engine.service';
 import { FrequencyService } from '../../core/services/frequency.service';
 import { PresetService } from '../../core/services/preset.service';
 import { SessionService } from '../../core/services/session.service';
 import { StatCardComponent } from '../../shared/components/stat-card.component';
 import { StateMessageComponent } from '../../shared/components/state-message.component';
+import { PlaybackModeComponent } from '../../shared/components/playback-mode.component';
 
-/** Exige ao menos uma frequência escolhida. */
 function atLeastOne(control: AbstractControl): ValidationErrors | null {
   return Array.isArray(control.value) && control.value.length > 0 ? null : { atLeastOne: true };
 }
@@ -18,7 +19,7 @@ function atLeastOne(control: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-presets-page',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, StatCardComponent, StateMessageComponent],
+  imports: [ReactiveFormsModule, RouterLink, StatCardComponent, StateMessageComponent, PlaybackModeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './presets.page.html',
 })
@@ -26,16 +27,16 @@ export class PresetsPage {
   private readonly fb = inject(FormBuilder);
   readonly freq = inject(FrequencyService);
   readonly store = inject(PresetService);
-  private readonly session = inject(SessionService);
+  readonly audio = inject(AudioEngine);
+  readonly session = inject(SessionService);
 
   readonly goals = (Object.keys(GOAL_LABELS) as Goal[]).map((value) => ({ value, label: GOAL_LABELS[value] }));
   readonly goalLabels = GOAL_LABELS;
 
-  /** O formulário começa com a sessão que o usuário montou no catálogo. */
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(30)]],
     goal: ['foco' as Goal, Validators.required],
-    frequencyIds: [[...this.session.ids()] as string[], atLeastOne],
+    frequencyIds: [this.session.items().map((item) => item.id), atLeastOne],
   });
 
   readonly saved = signal(false);
@@ -50,7 +51,7 @@ export class PresetsPage {
     return this.freq.items().filter((f) => ids.includes(f.id));
   });
 
-  readonly pickedMinutes = computed(() => this.pickedItems().reduce((sum, f) => sum + f.durationMin, 0));
+  readonly pickedMinutes = computed(() => this.pickedItems().reduce((sum, f) => sum + frequencyDurationMinutes(f), 0));
 
   constructor() {
     this.freq.load();
@@ -66,6 +67,34 @@ export class PresetsPage {
     control.setValue(current.includes(id) ? current.filter((x) => x !== id) : [...current, id]);
     control.markAsTouched();
     this.saved.set(false);
+  }
+
+  playPreset(preset: Preset): void {
+    if (
+      this.audio.currentPresetId() === preset.id &&
+      this.audio.playing() &&
+      this.audio.currentPlaybackMode() === this.session.playbackMode()
+    ) {
+      if (this.audio.paused()) this.audio.resume();
+      else this.audio.pause();
+      return;
+    }
+
+    const frequencies = this.freq.items().filter((frequency) => preset.frequencyIds.includes(frequency.id));
+    if (frequencies.length === 0) return;
+
+    this.session.loadPreset(frequencies, preset.id);
+  }
+
+  setPlaybackMode(mode: PlaybackMode): void {
+    this.session.playbackMode.set(mode);
+  }
+
+  presetStatus(preset: Preset): string {
+    if (this.audio.currentPresetId() === preset.id && this.audio.playing()) {
+      return this.audio.paused() ? 'Pausado' : 'Tocando';
+    }
+    return 'Salvo';
   }
 
   submit(): void {

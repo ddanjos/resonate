@@ -29,7 +29,7 @@ export class PlayButton {
   protected active = computed(() => this.audio.playingKey() === this.soundKey());
 
   onClick(e: Event): void {
-    e.stopPropagation(); // não dispara o clique do card (seleção/link)
+    e.stopPropagation();
     this.audio.toggle(this.soundKey(), this.spec(), this.label());
   }
 }

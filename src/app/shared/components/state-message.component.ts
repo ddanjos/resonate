@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 
 export type StateKind = 'loading' | 'error' | 'empty';
 
-/** Mensagem para carregando, erro e lista vazia. No erro, oferece tentar de novo. */
 @Component({
   selector: 'app-state-message',
   standalone: true,

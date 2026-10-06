@@ -31,7 +31,7 @@
             </div>
             <div class="rounded-2xl border border-borda bg-superficie/80 px-4 py-3">
               <dt class="text-xs text-suave">Duração</dt>
-              <dd class="font-titulo text-lg">{{ f.durationMin }} min</dd>
+              <dd class="font-titulo text-lg">{{ f.durationMin ?? f.durationMinutes ?? f.duration ?? 0 }} min</dd>
             </div>
             <div class="rounded-2xl border border-borda bg-superficie/80 px-4 py-3">
               <dt class="text-xs text-suave">Tipo</dt>
@@ -41,28 +41,22 @@
 
           <section class="mt-6 rounded-onda border border-borda bg-superficie/80 p-6" aria-label="Player">
             <div class="flex flex-wrap items-center gap-4">
+              @if (isPlaying()) {
+                <p class="text-sm text-suave" role="status">
+                  {{ audio.paused() ? 'Pausado no player global' : 'Tocando no player global' }}
+                </p>
+              } @else {
+                <button
+                  type="button"
+                  (click)="startPlayback()"
+                  class="min-h-10 rounded-full border border-destaque/35 bg-destaque/10 px-5 py-2 text-sm font-medium text-destaque transition-colors hover:border-destaque/60 hover:bg-destaque/15"
+                >
+                  Ouvir agora
+                </button>
+              }
               <button
                 type="button"
-                (click)="togglePlay()"
-                class="rounded-full bg-destaque px-6 py-3 font-medium text-fundo hover:bg-onda"
-              >
-                {{ isPlaying() ? 'Parar' : 'Ouvir agora' }}
-              </button>
-              <label class="flex items-center gap-3 text-sm text-suave">
-                Volume
-                <input
-                  type="range"
-                  min="0"
-                  max="0.6"
-                  step="0.01"
-                  [value]="audio.volume()"
-                  (input)="onVolume($event)"
-                  class="w-40 accent-destaque"
-                />
-              </label>
-              <button
-                type="button"
-                (click)="session.toggle(f.id)"
+                (click)="toggleSession(f.id)"
                 [attr.aria-pressed]="inSession()"
                 class="rounded-full border border-destaque/50 px-5 py-3 text-sm text-destaque hover:bg-destaque/10"
               >
@@ -86,25 +80,25 @@
           </section>
 
           <section class="mt-8">
-            <h2 class="font-titulo text-xl font-semibold">Notas da comunidade</h2>
+            <h2 class="font-titulo text-xl font-semibold">Avaliações de demonstração</h2>
+            <p class="mt-2 text-sm text-suave">Comentários e endereços fictícios, criados apenas para demonstrar o projeto.</p>
             <div class="mt-3">
               @if (community.loading()) {
                 <app-state-message kind="loading" heading="Carregando notas" />
               } @else {
                 @if (community.error(); as message) {
-                  <app-state-message kind="error" heading="Notas indisponíveis" [detail]="message" (retry)="community.load(f.communityPostId)" />
-                } @else {
-                  <ul class="grid gap-3 sm:grid-cols-3">
-                    @for (n of community.notes(); track n.id) {
-                      <li class="rounded-2xl border border-borda bg-superficie/80 p-4 text-sm">
-                        <p class="line-clamp-4 text-texto/85">{{ n.body }}</p>
-                        <p class="mt-3 text-xs text-suave">{{ n.email }}</p>
-                      </li>
-                    } @empty {
-                      <li class="text-sm text-suave sm:col-span-3">Ninguém comentou esta frequência ainda.</li>
-                    }
-                  </ul>
+                  <app-state-message kind="error" heading="API indisponível" [detail]="message" (retry)="f.communityPostId != null && community.load(f.communityPostId, f.id)" />
                 }
+                <ul class="mt-3 grid gap-3 sm:grid-cols-3">
+                  @for (n of community.notes(); track n.id) {
+                    <li class="rounded-2xl border border-borda bg-superficie/80 p-4 text-sm">
+                      <p class="line-clamp-4 text-texto/85">{{ n.body }}</p>
+                      <p class="mt-3 text-xs text-suave">{{ n.email }}</p>
+                    </li>
+                  } @empty {
+                    <li class="text-sm text-suave sm:col-span-3">Nenhuma avaliação de demonstração disponível.</li>
+                  }
+                </ul>
               }
             </div>
           </section>

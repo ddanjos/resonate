@@ -7,7 +7,7 @@ O **Resonate** é uma SPA em Angular com Tailwind CSS, construída a partir do c
 ## Funcionalidades
 
 - **Catálogo de frequências** com filtro por objetivo (Foco, Relaxamento, Sono) e busca por texto.
-- **Sessão de escuta**: o usuário adiciona frequências e vê em tempo real a duração total e a classificação (curta, média ou longa).
+- **Sessão de escuta**: o usuário escolhe tocar as frequências em sequência ou ao mesmo tempo; duração e classificação acompanham o modo selecionado.
 - **Página de detalhe** em `/detail/:id`, com dados técnicos, player e notas da comunidade.
 - **Som gerado no navegador** com a Web Audio API: tons puros, batidas binaurais (use fones) e ruídos filtrados. Não há arquivos de áudio.
 - **Presets**: formulário com validação para salvar combinações. Cada preset pode ser ativado ou pausado, e os totais mudam na hora.
@@ -25,7 +25,7 @@ O **Resonate** é uma SPA em Angular com Tailwind CSS, construída a partir do c
 Requisitos: Node.js 20 ou superior e Angular CLI (`npm i -g @angular/cli`).
 
 ```bash
-git clone https://github.com/seu-usuario/resonate.git
+git clone https://github.com/ddanjos/resonate.git
 cd resonate
 npm install
 npm start
@@ -44,11 +44,11 @@ src/app/
 │       ├── community.service.ts       notas da API pública JSONPlaceholder
 │       ├── session.service.ts         sessão de escuta atual (signal)
 │       ├── preset.service.ts          presets salvos (signals + computed)
-│       └── audio.service.ts           síntese de áudio (Web Audio API)
+│       └── audio-engine.service.ts    player global: prévias, sessões e presets (Web Audio API)
 ├── shared/components/
 │   ├── navbar.component.ts            menu com destaque da rota atual
 │   ├── wave-lines.component.ts        linhas onduladas (input: lines, amplitude, height)
-│   ├── frequency-card.component.ts    input: frequency, selected | output: toggle
+│   ├── frequency-card.component.ts    input: freq | ações de sessão e rota de detalhe
 │   ├── goal-filter.component.ts       input: options, active | output: changed
 │   ├── stat-card.component.ts         input: label, value, hint
 │   └── state-message.component.ts     carregando, erro e vazio | output: retry

@@ -1,12 +1,12 @@
 <section class="relative isolate overflow-hidden rounded-onda border border-borda bg-superficie/60">
-  <div class="absolute inset-0 -z-10 opacity-80">
+  <div class="absolute inset-0 -z-10 opacity-25">
     <app-wave-lines [lines]="44" [amplitude]="52" [height]="260" />
   </div>
   <div class="px-6 py-14 sm:px-12 sm:py-20">
     <h1 class="max-w-xl font-titulo text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
       Escolha a frequência certa para o seu momento
     </h1>
-    <p class="mt-4 max-w-lg text-suave">
+    <p class="mt-4 max-w-lg text-texto/85">
       Monte uma sessão com tons, ruídos e batidas binaurais. Veja quanto tempo ela dura e salve como preset.
     </p>
   </div>
@@ -44,9 +44,7 @@
         @for (f of filtered(); track f.id) {
           <li>
             <app-frequency-card
-              [frequency]="f"
-              [selected]="session.ids().includes(f.id)"
-              (toggle)="session.toggle($event)"
+              [freq]="f"
             />
           </li>
         } @empty {
@@ -67,7 +65,18 @@
   <section class="mt-10 rounded-onda border border-destaque/40 bg-superficie/80 p-6 shadow-brilho" aria-label="Sessão atual">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <h2 class="font-titulo text-xl font-semibold">Sua sessão</h2>
-      <div class="flex gap-2">
+      <div class="flex flex-wrap items-center gap-2">
+        <app-playback-mode
+          [mode]="session.playbackMode()"
+          (changed)="session.playbackMode.set($event)"
+        />
+        <button
+          type="button"
+          (click)="session.playSession()"
+          class="min-h-10 rounded-full border border-destaque/35 bg-destaque/10 px-4 py-2 text-sm font-medium text-destaque transition-colors hover:border-destaque/60 hover:bg-destaque/15"
+        >
+          Tocar sessão
+        </button>
         <button
           type="button"
           (click)="session.clear()"
@@ -77,7 +86,7 @@
         </button>
         <a
           routerLink="/presets"
-          class="rounded-full bg-destaque px-4 py-2 text-sm font-medium text-fundo hover:bg-onda"
+          class="min-h-10 rounded-full border border-destaque/35 bg-destaque/10 px-4 py-2 text-sm font-medium text-destaque transition-colors hover:border-destaque/60 hover:bg-destaque/15"
         >
           Salvar como preset
         </a>
@@ -86,23 +95,13 @@
     <ul class="mt-4 divide-y divide-borda/70">
       @for (item of sessionItems(); track item.id) {
         <li class="flex items-center justify-between gap-4 py-2 text-sm">
-          <span>{{ item.name }}</span>
-          <span class="text-suave">{{ item.durationMin }} min</span>
+          <span>{{ item.name ?? item.title }}</span>
+          <span class="text-suave">{{ item.durationMin ?? item.durationMinutes ?? item.duration ?? 0 }} min</span>
         </li>
       }
     </ul>
   </section>
 
-<section class="mt-8 flex flex-wrap gap-2" aria-label="Teste de som">
-  <button type="button" class="rounded-full border border-borda px-4 py-2 text-sm hover:text-destaque"
-    (click)="audio.play('teste-tom', { kind: 'tone', hz: 432 }, 'Tom 432 Hz')">Tom 432 Hz</button>
-  <button type="button" class="rounded-full border border-borda px-4 py-2 text-sm hover:text-destaque"
-    (click)="audio.play('teste-binaural', { kind: 'binaural', carrierHz: 200, beatHz: 10 }, 'Binaural alfa (10 Hz)')">Binaural alfa (10 Hz)</button>
-  <button type="button" class="rounded-full border border-borda px-4 py-2 text-sm hover:text-destaque"
-    (click)="audio.play('teste-ruido', { kind: 'noise', color: 'pink' }, 'Ruído rosa')">Ruído rosa</button>
-  <button type="button" class="rounded-full bg-destaque px-4 py-2 text-sm font-medium text-fundo"
-    (click)="audio.stop()">Parar</button>
-</section>
 }
 
 

@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#08161b" />
+    <meta name="description" content="Apresentação de cinco minutos do projeto Resonate." />
+    <title>Resonate | Apresentação</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #08161b;
+        --surface: #0f2229;
+        --line: #1d3a44;
+        --text: #e6f4f8;
+        --muted: #8fb0bb;
+        --blue: #4cb3ff;
+        --cyan: #8de3ff;
+        --green: #4fe3a8;
+        --title: 'Sora', sans-serif;
+        --body: 'Inter', sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+
+      html { background: var(--bg); scroll-behavior: smooth; }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        min-height: 100vh;
+        overflow: hidden;
+        color: var(--text);
+        font-family: var(--body);
+        background:
+          radial-gradient(70rem 40rem at 85% 5%, rgba(47, 111, 214, 0.14), transparent 62%),
+          radial-gradient(48rem 30rem at 0% 100%, rgba(141, 227, 255, 0.06), transparent 65%),
+          var(--bg);
+      }
+
+      button, a { font: inherit; }
+      button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px solid var(--cyan); outline-offset: 4px; }
+
+      .topbar {
+        position: fixed;
+        z-index: 5;
+        inset: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 62px;
+        padding: 0 clamp(18px, 4vw, 56px);
+        border-bottom: 1px solid rgba(29, 58, 68, 0.75);
+        background: rgba(8, 22, 27, 0.88);
+        backdrop-filter: blur(14px);
+      }
+
+      .brand { display: flex; align-items: center; gap: 10px; font: 600 14px var(--title); letter-spacing: 0; }
+      .brand-mark { width: 25px; height: 25px; color: var(--blue); }
+      .top-meta { display: flex; align-items: center; gap: 20px; color: var(--muted); font-size: 12px; }
+      .top-meta strong { color: var(--text); font-weight: 500; }
+
+      .progress-track { position: fixed; z-index: 6; inset: 61px 0 auto; height: 2px; background: rgba(29, 58, 68, 0.55); }
+      .progress-fill { width: 16.666%; height: 100%; background: var(--blue); transition: width 300ms ease; }
+
+      main { min-height: 100svh; }
+      .slide {
+        display: none;
+        width: 100%;
+        min-height: 100svh;
+        padding: 92px clamp(22px, 7vw, 100px) 104px;
+        align-items: center;
+      }
+      .slide.is-active { display: grid; animation: arrive 380ms ease both; }
+      .content { width: min(1120px, 100%); margin: 0 auto; }
+      .eyebrow { display: flex; align-items: center; gap: 10px; margin: 0 0 18px; color: var(--cyan); font-size: 11px; font-weight: 600; text-transform: uppercase; }
+      .eyebrow::before { width: 22px; height: 1px; background: currentColor; content: ''; }
+      h1, h2, h3, p { margin-top: 0; }
+      h1, h2, h3 { font-family: var(--title); letter-spacing: 0; }
+      h1 { max-width: 700px; margin-bottom: 20px; font-size: clamp(44px, 7vw, 82px); font-weight: 600; line-height: 1.04; }
+      h2 { max-width: 820px; margin-bottom: 14px; font-size: clamp(32px, 5vw, 54px); font-weight: 500; line-height: 1.1; }
+      h3 { margin-bottom: 10px; font-size: 17px; font-weight: 500; }
+      .lead { max-width: 660px; margin-bottom: 0; color: var(--muted); font-size: clamp(16px, 1.7vw, 20px); line-height: 1.7; }
+      .accent { color: var(--blue); }
+      .cyan { color: var(--cyan); }
+      .muted { color: var(--muted); }
+
+      .intro-layout { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(240px, 0.7fr); align-items: center; gap: clamp(32px, 8vw, 110px); }
+      .cover-wrap { justify-self: end; width: min(100%, 360px); }
+      .cover-frame { overflow: hidden; aspect-ratio: 1; background: #0b1b20; }
+      .cover-frame > img { display: block; width: 100%; height: 100%; object-fit: contain; }
+      .cover-fallback { position: relative; display: grid; height: 100%; align-content: center; justify-items: center; overflow: hidden; padding: 24px; background: radial-gradient(ellipse at 53% 49%, rgba(47, 111, 214, 0.19), transparent 56%), #0b1b20; text-align: center; }
+      .cover-fallback[hidden] { display: none; }
+      .cover-fallback svg { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.78; }
+      .cover-fallback path { fill: none; stroke: var(--cyan); stroke-width: 1; }
+      .cover-fallback strong { position: relative; margin-top: 45%; font: 500 18px var(--title); letter-spacing: 0.12em; }
+      .cover-fallback span, .cover-fallback small { position: relative; margin-top: 7px; color: var(--muted); font-size: 10px; }
+      .cover-fallback small { max-width: 210px; margin-top: 18px; line-height: 1.5; }
+      .cover-caption { display: flex; justify-content: space-between; gap: 12px; padding-top: 12px; color: var(--muted); font-size: 11px; }
+      .cover-caption strong { color: var(--text); font-weight: 500; }
+      .slide-time { margin-left: auto; color: var(--muted); font: 11px var(--body); text-transform: none; }
+      .slide-time { margin-left: auto; color: var(--muted); font: 11px var(--body); text-transform: none; }
+      .intro-footer { display: flex; align-items: center; gap: 12px; margin-top: 34px; color: var(--muted); font-size: 12px; }
+      .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 16px rgba(79, 227, 168, 0.5); }
+
+      .concept-quote { max-width: 900px; margin: 30px 0 46px; padding-left: 24px; border-left: 2px solid var(--blue); font: 500 clamp(20px, 3vw, 31px)/1.45 var(--title); }
+      .concept-quote strong { color: var(--cyan); font-weight: 500; }
+      .concept-flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+      .flow-step { position: relative; padding-top: 18px; border-top: 1px solid var(--line); }
+      .flow-number { display: block; margin-bottom: 18px; color: var(--blue); font: 500 12px var(--title); }
+      .flow-step p { max-width: 300px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+
+      .board-intro { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 30px; }
+      .board-count { flex: 0 0 auto; color: var(--cyan); font: 500 13px var(--title); }
+      .board-groups { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+      .board-group { min-height: 230px; padding: 20px 0 0; border-top: 1px solid var(--line); }
+      .board-group .range { display: block; margin: 0 0 24px; color: var(--blue); font: 500 12px var(--title); }
+      .board-group h3 { margin-bottom: 12px; }
+      .board-group p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.7; }
+      .search-terms { margin-top: 12px !important; color: var(--cyan) !important; font-size: 11px !important; }
+      .pending-note { display: flex; align-items: flex-start; gap: 12px; max-width: 880px; margin-top: 24px; padding: 14px 16px; border: 1px solid rgba(76, 179, 255, 0.28); color: var(--muted); font-size: 12px; line-height: 1.6; }
+      .pending-note strong { color: var(--text); font-weight: 500; }
+
+      .identity-layout { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: clamp(34px, 7vw, 86px); align-items: start; }
+      .swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 28px 0 25px; }
+      .swatch { min-width: 0; }
+      .swatch-color { height: 58px; margin-bottom: 9px; border: 1px solid rgba(230, 244, 248, 0.13); }
+      .swatch-name, .swatch-hex { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .swatch-name { margin-bottom: 3px; color: var(--text); font-size: 10px; }
+      .swatch-hex { color: var(--muted); font: 10px var(--body); }
+      .font-sample { padding: 20px 0; border-top: 1px solid var(--line); }
+      .font-sample:last-child { border-bottom: 1px solid var(--line); }
+      .font-sample span { display: block; margin-bottom: 8px; color: var(--muted); font-size: 11px; }
+      .font-title-sample { font: 500 27px var(--title); }
+      .font-body-sample { color: var(--muted); font: 15px var(--body); }
+      .direction { margin-top: 30px; color: var(--cyan); font: 500 20px/1.5 var(--title); }
+      .shape-list { display: grid; gap: 0; margin-top: 25px; }
+      .shape-list p { margin: 0; padding: 14px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+      .shape-list strong { color: var(--text); font-weight: 500; }
+
+      .demo-layout { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: clamp(30px, 7vw, 90px); align-items: center; }
+      .demo-steps { list-style: none; margin: 30px 0 0; padding: 0; counter-reset: demo; }
+      .demo-steps li { display: grid; grid-template-columns: 32px 1fr; gap: 14px; padding: 15px 0; border-top: 1px solid var(--line); counter-increment: demo; }
+      .demo-steps li::before { color: var(--blue); font: 500 12px var(--title); content: '0' counter(demo); }
+      .demo-steps strong { display: block; margin-bottom: 4px; font-size: 13px; font-weight: 500; }
+      .demo-steps span { color: var(--muted); font-size: 12px; line-height: 1.5; }
+      .player-demo { padding: clamp(20px, 3vw, 34px) 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+      .demo-track { display: flex; align-items: center; gap: 16px; }
+      .demo-wave { display: flex; height: 40px; align-items: center; gap: 4px; }
+      .demo-wave i { display: block; width: 3px; border-radius: 5px; background: var(--blue); }
+      .demo-wave i:nth-child(1), .demo-wave i:nth-child(5) { height: 13px; }
+      .demo-wave i:nth-child(2), .demo-wave i:nth-child(4) { height: 25px; }
+      .demo-wave i:nth-child(3) { height: 36px; }
+      .track-state { margin: 0 0 5px; color: var(--cyan); font-size: 10px; }
+      .track-name { margin: 0; font: 500 17px var(--title); }
+      .demo-timeline { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 11px; margin: 25px 0; color: var(--muted); font: 11px var(--body); }
+      .timeline-line { height: 4px; overflow: hidden; border-radius: 4px; background: var(--line); }
+      .timeline-progress { width: 38%; height: 100%; background: var(--blue); }
+      .demo-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; }
+      .transport { display: flex; align-items: center; gap: 10px; }
+      .transport-mark { display: grid; width: 40px; height: 40px; place-items: center; border: 1px solid rgba(76, 179, 255, 0.4); border-radius: 50%; color: var(--blue); }
+      .transport-mark svg { width: 15px; height: 15px; fill: currentColor; }
+      .fake-volume { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 11px; }
+      .fake-volume-line { width: 100px; height: 3px; border-radius: 3px; background: linear-gradient(90deg, var(--blue) 54%, var(--line) 54%); }
+      .open-app { display: inline-flex; align-items: center; gap: 9px; margin-top: 30px; padding: 11px 16px; border: 1px solid rgba(76, 179, 255, 0.4); border-radius: 999px; color: var(--cyan); font-size: 12px; text-decoration: none; transition: background 160ms ease; }
+      .open-app:hover { background: rgba(76, 179, 255, 0.1); }
+
+      .code-layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(220px, 0.7fr); gap: clamp(28px, 6vw, 72px); align-items: start; }
+      .code-window { overflow: hidden; border: 1px solid var(--line); background: rgba(4, 14, 17, 0.75); }
+      .code-top { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 10px; }
+      pre { overflow-x: auto; margin: 0; padding: 22px 18px; color: #c9e6ed; font: 12px/1.8 'Cascadia Code', Consolas, monospace; tab-size: 2; }
+      .code-key { color: var(--cyan); }
+      .code-value { color: #a8e9ca; }
+      .code-note { color: var(--muted); font-size: 13px; line-height: 1.7; }
+      .code-note p { padding: 13px 0; border-top: 1px solid var(--line); }
+      .closing { margin-top: 28px; color: var(--cyan); font: 500 21px/1.45 var(--title); }
+      .deliverable-note { margin-top: 18px; color: #9bb5bb; font-size: 11px; line-height: 1.6; }
+
+      .notes { position: fixed; z-index: 7; right: 20px; bottom: 76px; width: min(420px, calc(100vw - 40px)); }
+      .notes summary { width: fit-content; margin-left: auto; padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); cursor: pointer; font-size: 11px; list-style: none; }
+      .notes summary::-webkit-details-marker { display: none; }
+      .notes p { max-height: 34vh; overflow: auto; margin: 8px 0 0; padding: 16px; border: 1px solid var(--line); background: rgba(15, 34, 41, 0.98); color: var(--text); font-size: 13px; line-height: 1.7; }
+
+      .controls {
+        position: fixed;
+        z-index: 5;
+        inset: auto 0 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 58px;
+        padding: 0 clamp(18px, 4vw, 56px);
+        border-top: 1px solid rgba(29, 58, 68, 0.75);
+        background: rgba(8, 22, 27, 0.92);
+        backdrop-filter: blur(14px);
+      }
+      .control-side, .control-center { display: flex; align-items: center; gap: 8px; }
+      .control-center { position: absolute; left: 50%; transform: translateX(-50%); }
+      .nav-button { display: inline-flex; min-width: 38px; height: 36px; align-items: center; justify-content: center; gap: 7px; padding: 0 10px; border: 1px solid transparent; border-radius: 999px; background: transparent; color: var(--muted); cursor: pointer; font-size: 11px; transition: color 150ms ease, border-color 150ms ease, background 150ms ease; }
+      .nav-button:hover:not(:disabled) { border-color: var(--line); background: rgba(15, 34, 41, 0.75); color: var(--text); }
+      .nav-button:disabled { opacity: 0.35; cursor: default; }
+      .nav-button svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+      .slide-count { min-width: 58px; color: var(--muted); font: 11px var(--body); text-align: center; }
+      .slide-count strong { color: var(--text); font-weight: 500; }
+
+      @keyframes arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+      @media (max-width: 760px) {
+        .top-meta { gap: 10px; font-size: 10px; }
+        .top-meta .runtime { display: none; }
+        .slide { height: 100svh; min-height: 0; overflow-y: auto; align-content: start; align-items: start; padding: 84px 22px 108px; }
+        .intro-layout, .identity-layout, .demo-layout, .code-layout { grid-template-columns: 1fr; gap: 26px; }
+        .intro-layout { align-content: center; }
+        h1 { font-size: clamp(42px, 13vw, 64px); }
+        .cover-wrap { width: min(48vw, 210px); justify-self: start; }
+        .cover-caption { font-size: 9px; }
+        .intro-footer { margin-top: 22px; }
+        .concept-quote { margin: 22px 0 30px; padding-left: 16px; }
+        .concept-flow { grid-template-columns: 1fr; gap: 16px; }
+        .flow-step { display: grid; grid-template-columns: 36px 1fr; gap: 10px; padding-top: 12px; }
+        .flow-number { margin: 3px 0 0; }
+        .flow-step h3 { margin-bottom: 5px; }
+        .board-intro { display: block; margin-bottom: 20px; }
+        .board-count { display: block; margin-top: 12px; }
+        .board-groups { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .board-group { min-height: 0; padding-top: 12px; }
+        .board-group .range { margin-bottom: 12px; }
+        .pending-note { margin-top: 18px; }
+        .swatches { gap: 6px; }
+        .swatch-color { height: 40px; }
+        .swatch-name, .swatch-hex { font-size: 8px; }
+        .shape-list { margin-top: 8px; }
+        .demo-layout { align-content: start; gap: 22px; }
+        .demo-steps { margin-top: 14px; }
+        .demo-steps li { padding: 10px 0; }
+        .player-demo { padding: 18px 0; }
+        .demo-timeline { margin: 17px 0; }
+        .open-app { margin-top: 20px; }
+        .code-layout { gap: 18px; }
+        pre { padding: 16px 12px; font-size: 10px; }
+        .code-note { font-size: 12px; }
+        .code-note p { padding: 8px 0; }
+        .closing { margin-top: 8px; font-size: 18px; }
+        .deliverable-note { margin-top: 10px; }
+        .control-center { position: static; transform: none; }
+        .controls { min-height: 56px; }
+        .nav-button .label { display: none; }
+      }
+
+      @media (max-height: 720px) and (min-width: 761px) {
+        .slide { padding-top: 76px; padding-bottom: 76px; }
+        .cover-wrap { width: min(29vw, 290px); }
+        .board-group { min-height: 190px; }
+        h1 { font-size: clamp(42px, 6vw, 68px); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+      }
+
+      @media print {
+        body { overflow: visible; background: var(--bg); print-color-adjust: exact; }
+        .topbar, .progress-track, .controls, .notes { display: none !important; }
+        .slide, .slide.is-active { display: grid !important; min-height: 100vh; break-after: page; padding: 36px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M5 32h8c6 0 6-13 12-13s6 26 12 26 6-26 12-26 6 13 12 13" stroke="currentColor" stroke-width="4" stroke-linecap="round" /></svg>
+        <span>Resonate</span>
+      </div>
+      <div class="top-meta"><strong>Projeto: Da capa para a tela</strong><span class="runtime">Apresentação · 05:00</span></div>
+    </header>
+    <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progress"></div></div>
+
+    <main id="deck" aria-live="polite">
+      <section class="slide is-active" data-title="A origem" data-time="00:30" aria-label="Slide 1 de 6: A origem">
+        <div class="content intro-layout">
+          <div>
+            <p class="eyebrow">Da capa para a tela · 01 / 06 <span class="slide-time">00:30</span></p>
+            <h1>Uma ideia em <span class="accent">ressonância.</span></h1>
+            <p class="lead">Resonate é um gerenciador de frequências para foco, relaxamento e sono. A experiência transforma ondas visuais em sessões de escuta que o usuário monta e controla.</p>
+            <div class="intro-footer"><span class="pulse"></span><span>Conceito, identidade e aplicação</span></div>
+          </div>
+          <figure class="cover-wrap">
+            <div class="cover-frame">
+              <img id="cover-image" src="https://i.scdn.co/image/ab67616d0000b2737a18e6c7014695b2110c73e8" alt="Capa do álbum Perfect Peace, de sondae, referência conceitual do Resonate" />
+              <div class="cover-fallback" id="cover-fallback" hidden>
+                <svg viewBox="0 0 360 360" preserveAspectRatio="none" aria-hidden="true">
+                  <path d="M0 95c54-1 50-25 96-25s51 57 99 57 48-49 92-49 51 17 73 17" />
+                  <path d="M0 113c57-1 51-24 97-24s50 55 98 55 49-47 93-47 50 16 72 16" />
+                  <path d="M0 131c58-1 51-22 98-22s49 52 97 52 50-45 94-45 49 15 71 15" />
+                  <path d="M0 149c59-1 52-20 99-20s48 49 96 49 51-43 95-43 48 14 70 14" />
+                  <path d="M0 167c60-1 53-18 100-18s47 46 95 46 52-41 96-41 47 13 69 13" />
+                  <path d="M0 185c61-1 54-16 101-16s46 43 94 43 53-39 97-39 46 12 68 12" />
+                  <path d="M0 203c62-1 54-14 102-14s45 40 93 40 54-37 98-37 45 11 67 11" />
+                  <path d="M0 221c63-1 55-12 103-12s44 37 92 37 55-35 99-35 44 10 66 10" />
+                  <path d="M0 239c64-1 55-10 104-10s43 34 91 34 56-33 100-33 43 9 65 9" />
+                </svg>
+                <strong>PERFECT PEACE</strong>
+                <span>sondae · referência escolhida</span>
+                <small>Ilustração conceitual de contingência; não substitui a capa original.</small>
+              </div>
+            </div>
+            <figcaption class="cover-caption"><strong>Perfect Peace · sondae</strong><span>Referência; não aparece no app</span></figcaption>
+          </figure>
+          <details class="notes"><summary>Notas de fala · 30 s</summary><p>“Escolhi a capa do álbum Perfect Peace, do sondae, porque as linhas onduladas lembram frequências se propagando. A palavra que sintetiza essa leitura é ressonância. A partir dela, decidi que o site não seria só sobre som: ele permitiria combinar frequências e ouvir o resultado.”</p></details>
+        </div>
+      </section>
+
+      <section class="slide" data-title="A ligação funcional" data-time="00:40" aria-label="Slide 2 de 6: A ligação funcional">
+        <div class="content">
+          <p class="eyebrow">02 / 06 · Conceito em ação <span class="slide-time">00:40</span></p>
+          <h2>Da imagem para uma <span class="cyan">experiência.</span></h2>
+          <blockquote class="concept-quote">“Escolhi esta capa porque ela fala de <strong>ressonância</strong>, e por isso meu site permite <strong>combinar frequências</strong> para criar uma sessão de escuta.”</blockquote>
+          <div class="concept-flow">
+            <div class="flow-step"><span class="flow-number">01</span><div><h3>Linhas que vibram</h3><p>A capa sugere movimento contínuo, camadas e frequências em harmonia.</p></div></div>
+            <div class="flow-step"><span class="flow-number">02</span><div><h3>Escolhas que se somam</h3><p>No catálogo, cada frequência entra na sessão e altera duração e classificação.</p></div></div>
+            <div class="flow-step"><span class="flow-number">03</span><div><h3>Som que responde</h3><p>O player gera áudio no navegador e oferece reprodução em sequência ou simultânea.</p></div></div>
+          </div>
+          <details class="notes"><summary>Notas de fala · 40 s</summary><p>“A ligação entre referência e funcionalidade foi importante. As ondas inspiraram tanto o componente visual quanto a regra central: montar sessões. A pessoa pode escolher uma sequência de frequências ou misturá-las ao mesmo tempo, salvar a combinação como preset e controlar a reprodução num player global.”</p></details>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Moodboard" data-time="00:50" aria-label="Slide 3 de 6: Moodboard">
+        <div class="content">
+          <p class="eyebrow">03 / 06 · Pesquisa visual <span class="slide-time">00:50</span></p>
+          <div class="board-intro">
+            <div><h2>O clima antes da interface.</h2><p class="lead">Quatro grupos conectam vibração, luz, textura e linguagem de produto.</p></div>
+            <span class="board-count">12–20 referências no painel</span>
+          </div>
+          <div class="board-groups">
+            <div class="board-group"><span class="range">04–06 imagens</span><h3>Conceito</h3><p>Fenômenos onde a vibração fica visível: água, cordas e padrões de interferência.</p><p class="search-terms">cymatics · ripples · oscilloscope</p></div>
+            <div class="board-group"><span class="range">03–05 imagens</span><h3>Cor e luz</h3><p>Fundos escuros, azul luminoso e uma luz de apoio com presença controlada.</p><p class="search-terms">deep teal · blue hour · cyan glow</p></div>
+            <div class="board-group"><span class="range">03–04 imagens</span><h3>Textura e forma</h3><p>Grão, contornos e superfícies suaves que dão movimento sem ruído visual.</p><p class="search-terms">film grain · contour lines · flowing silk</p></div>
+            <div class="board-group"><span class="range">02–04 imagens</span><h3>Interface</h3><p>Referências reais de players e apps ambientais, escolhidas pelo clima e clareza.</p><p class="search-terms">ambient sound app · music player</p></div>
+          </div>
+          <div class="pending-note"><span class="cyan">Nota</span><span><strong>Material a inserir:</strong> o roteiro dos grupos está pronto em <code>docs/MOODBOARD.md</code>, mas o painel visual final precisa das referências reais escolhidas e justificadas pelo autor.</span></div>
+          <details class="notes"><summary>Notas de fala · 50 s</summary><p>“O moodboard organiza as referências em quatro grupos. No conceito, busco vibração visível; em cor e luz, fundos teal escuros e pontos azuis; em textura, grão e linhas; em interface, players ambientais minimalistas. Antes da apresentação, vou mostrar aqui o painel final com minhas 12 a 20 imagens reais e as justificativas de cada grupo.”</p></details>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Identidade visual" data-time="00:35" aria-label="Slide 4 de 6: Identidade visual">
+        <div class="content">
+          <p class="eyebrow">04 / 06 · Identidade visual <span class="slide-time">00:35</span></p>
+          <div class="identity-layout">
+            <div>
+              <h2>Calma, contraste e <span class="cyan">um brilho.</span></h2>
+              <p class="lead">A identidade reduz a vibração a um elemento de destaque por vez.</p>
+              <p class="direction">“Tudo vibra devagar: fundo escuro e granulado, linhas finas e fluidas, e um único brilho azul por tela.”</p>
+              <div class="swatches" aria-label="Paleta de cores">
+                <div class="swatch"><div class="swatch-color" style="background:#08161b"></div><span class="swatch-name">Fundo</span><span class="swatch-hex">#08161b</span></div>
+                <div class="swatch"><div class="swatch-color" style="background:#0f2229"></div><span class="swatch-name">Superfície</span><span class="swatch-hex">#0f2229</span></div>
+                <div class="swatch"><div class="swatch-color" style="background:#e6f4f8"></div><span class="swatch-name">Texto</span><span class="swatch-hex">#e6f4f8</span></div>
+                <div class="swatch"><div class="swatch-color" style="background:#4cb3ff"></div><span class="swatch-name">Destaque</span><span class="swatch-hex">#4cb3ff</span></div>
+                <div class="swatch"><div class="swatch-color" style="background:#8de3ff"></div><span class="swatch-name">Onda</span><span class="swatch-hex">#8de3ff</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="font-sample"><span>TÍTULOS · SORA</span><div class="font-title-sample">Frequências em fluxo</div></div>
+              <div class="font-sample"><span>TEXTO · INTER</span><div class="font-body-sample">Informação clara para escolher, ouvir e combinar.</div></div>
+              <div class="shape-list"><p><strong>Forma</strong> · Painéis arredondados e bordas finas.</p><p><strong>Textura</strong> · Grão de filme e linhas onduladas animadas.</p><p><strong>Contraste</strong> · Texto legível sobre superfícies profundas.</p></div>
+            </div>
+          </div>
+          <details class="notes"><summary>Notas de fala · 35 s</summary><p>“A paleta veio do azul luminoso e do fundo verde-petróleo da referência. Sora diferencia os títulos, enquanto Inter mantém os dados legíveis. Os cantos arredondados e as linhas onduladas retomam as curvas, mas a direção pede poucos elementos brilhando ao mesmo tempo.”</p></details>
+        </div>
+      </section>
+
+      <section class="slide" data-title="A aplicação" data-time="01:55" aria-label="Slide 5 de 6: A aplicação">
+        <div class="content">
+          <p class="eyebrow">05 / 06 · Aplicação em funcionamento <span class="slide-time">01:55</span></p>
+          <div class="demo-layout">
+            <div>
+              <h2>Uma sessão que o usuário <span class="cyan">monta.</span></h2>
+              <p class="lead">O fluxo principal transforma a ideia de combinação em decisões audíveis.</p>
+              <ol class="demo-steps">
+                <li><div><strong>Explorar</strong><span>Filtrar por objetivo, buscar e abrir os detalhes de uma frequência.</span></div></li>
+                <li><div><strong>Combinar</strong><span>Adicionar frequências e escolher sequência ou mix simultâneo.</span></div></li>
+                <li><div><strong>Controlar</strong><span>Usar o player global para acompanhar faixa, progresso e volume.</span></div></li>
+                <li><div><strong>Reutilizar</strong><span>Salvar a sessão como preset e tocá-la novamente.</span></div></li>
+              </ol>
+              <a class="open-app" href="http://localhost:4200/" target="_blank" rel="noreferrer">Abrir Resonate no navegador <span aria-hidden="true">↗</span></a>
+            </div>
+            <div class="player-demo" aria-label="Representação visual do player global">
+              <div class="demo-track">
+                <div class="demo-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+                <div><p class="track-state">TOCANDO AGORA · FAIXA 2 DE 4</p><p class="track-name">Alfa de concentração</p></div>
+              </div>
+              <div class="demo-timeline"><span>08:12</span><div class="timeline-line"><div class="timeline-progress"></div></div><span>25:00</span></div>
+              <div class="demo-actions">
+                <div class="transport"><span class="transport-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zm6 0h4v14h-4z" /></svg></span><span class="muted" style="font-size:12px">Pausar reprodução</span></div>
+                <div class="fake-volume"><span aria-hidden="true">◖</span><span class="fake-volume-line"></span><span>54%</span></div>
+              </div>
+            </div>
+          </div>
+          <details class="notes"><summary>Notas de fala · 1 min 55 s</summary><p>“Na aplicação, começo pelo catálogo e abro o detalhe para conferir dados e ouvir uma frequência. Adiciono itens à sessão; posso escolher sequência ou simultâneo. No modo sequencial, o player avança faixa a faixa. No simultâneo, mistura as fontes e mostra a duração correspondente. O player global acompanha a reprodução entre rotas. Também salvo uma combinação como preset para usá-la de novo. Agora vou demonstrar rapidamente esses passos no navegador.”</p></details>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Estado e fechamento" data-time="00:30" aria-label="Slide 6 de 6: Estado e fechamento">
+        <div class="content">
+          <p class="eyebrow">06 / 06 · Um trecho do qual me orgulho <span class="slide-time">00:30</span></p>
+          <h2>O modo define o <span class="cyan">tempo da sessão.</span></h2>
+          <div class="code-layout" style="margin-top:30px">
+            <div class="code-window">
+              <div class="code-top"><span>session.service.ts</span><span>Estado derivado com computed</span></div>
+              <pre><code><span class="code-key">public</span> totalDuration = <span class="code-value">computed</span>(() =&gt; {
+  <span class="code-key">const</span> durations = <span class="code-key">this</span>.items().map(frequencyDurationMinutes);
+
+  <span class="code-key">return this</span>.playbackMode() === <span class="code-value">'simultaneous'</span>
+    ? Math.max(0, ...durations)
+    : durations.reduce((total, duration) =&gt; total + duration, 0);
+});</code></pre>
+            </div>
+            <div class="code-note">
+              <p><strong class="text">Por que `computed`?</strong><br />A duração depende dos itens e do modo. Ela se recalcula quando os signals mudam, sem manter um total duplicado.</p>
+              <p><strong class="text">Requisitos Angular</strong><br />Signals, serviços com `inject()`, rotas, `@if`/`@for` e formulário validado.</p>
+              <p><strong class="text">Som</strong><br />Web Audio API gera tons, binaurais e ruído no navegador.</p>
+            </div>
+          </div>
+          <p class="closing">Resonate transforma frequência em escolha, combinação e escuta.</p>
+          <p class="deliverable-note">Antes de apresentar: inserir o moodboard final com 12–20 referências escolhidas e os dois desenhos de tela previstos no PDF.</p>
+          <details class="notes"><summary>Notas de fala · 30 s</summary><p>“Este computed compara dois comportamentos: no modo simultâneo, o tempo final é a faixa mais longa; em sequência, soma todas as durações. O resultado deriva dos signals, sem armazenar um total duplicado. Essa escolha conecta regra de negócio, estado reativo e interface.”</p></details>
+        </div>
+      </section>
+    </main>
+
+    <footer class="controls" aria-label="Controles da apresentação">
+      <div class="control-side"><button class="nav-button" id="previous" type="button" aria-label="Slide anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg><span class="label">Anterior</span></button></div>
+      <div class="control-center"><span class="slide-count"><strong id="current">01</strong> / <span id="total">06</span></span></div>
+      <div class="control-side"><button class="nav-button" id="fullscreen" type="button" aria-label="Alternar tela cheia"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3" /></svg></button><button class="nav-button" id="next" type="button" aria-label="Próximo slide"><span class="label">Próximo</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg></button></div>
+    </footer>
+
+    <script>
+      const slides = [...document.querySelectorAll('.slide')];
+      const current = document.querySelector('#current');
+      const progress = document.querySelector('#progress');
+      const previous = document.querySelector('#previous');
+      const next = document.querySelector('#next');
+      let activeIndex = 0;
+
+      document.querySelector('#cover-image').addEventListener('error', (event) => {
+        event.currentTarget.hidden = true;
+        document.querySelector('#cover-fallback').hidden = false;
+      });
+
+      function showSlide(index) {
+        activeIndex = Math.max(0, Math.min(slides.length - 1, index));
+        slides.forEach((slide, slideIndex) => {
+          const active = slideIndex === activeIndex;
+          slide.classList.toggle('is-active', active);
+          slide.setAttribute('aria-hidden', String(!active));
+          if (!active) slide.querySelector('details[open]')?.removeAttribute('open');
+        });
+        current.textContent = String(activeIndex + 1).padStart(2, '0');
+        progress.style.width = `${((activeIndex + 1) / slides.length) * 100}%`;
+        previous.disabled = activeIndex === 0;
+        next.disabled = activeIndex === slides.length - 1;
+        document.title = `Resonate | ${slides[activeIndex].dataset.title}`;
+      }
+
+      previous.addEventListener('click', () => showSlide(activeIndex - 1));
+      next.addEventListener('click', () => showSlide(activeIndex + 1));
+      document.querySelector('#fullscreen').addEventListener('click', async () => {
+        if (document.fullscreenElement) await document.exitFullscreen();
+        else await document.documentElement.requestFullscreen?.();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.altKey || event.ctrlKey || event.metaKey) return;
+        if (event.key === 'ArrowRight' || event.key === ' ' || event.key === 'PageDown') {
+          event.preventDefault();
+          showSlide(activeIndex + 1);
+        }
+        if (event.key === 'ArrowLeft' || event.key === 'PageUp') {
+          event.preventDefault();
+          showSlide(activeIndex - 1);
+        }
+        if (event.key === 'Home') showSlide(0);
+        if (event.key === 'End') showSlide(slides.length - 1);
+      });
+      document.querySelector('#total').textContent = String(slides.length).padStart(2, '0');
+      showSlide(0);
+    </script>
+  </body>
+</html>

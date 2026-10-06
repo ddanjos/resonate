@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { GOAL_LABELS } from '../../core/models/frequency.model';
+import { frequencyName, GOAL_LABELS } from '../../core/models/frequency.model';
 import { FrequencyService } from '../../core/services/frequency.service';
 import { PresetService } from '../../core/services/preset.service';
 import { SessionService } from '../../core/services/session.service';
@@ -9,6 +9,7 @@ import { GoalFilterComponent, GoalFilterValue } from '../../shared/components/go
 import { StatCardComponent } from '../../shared/components/stat-card.component';
 import { StateMessageComponent } from '../../shared/components/state-message.component';
 import { WaveLinesComponent } from '../../shared/components/wave-lines.component';
+import { PlaybackModeComponent } from '../../shared/components/playback-mode.component';
 import { AudioEngine } from '../../core/audio/audio-engine.service';
 
 
@@ -22,6 +23,7 @@ import { AudioEngine } from '../../core/audio/audio-engine.service';
     StatCardComponent,
     StateMessageComponent,
     WaveLinesComponent,
+    PlaybackModeComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home.page.html',
@@ -42,25 +44,22 @@ export class HomePage {
     { value: 'sono', label: GOAL_LABELS.sono },
   ];
 
-  /** Catálogo depois dos filtros de objetivo e de busca. */
   readonly filtered = computed(() => {
     const goal = this.goal();
     const text = this.query().trim().toLowerCase();
     return this.freq.items().filter(
       (f) =>
         (goal === 'todos' || f.goal === goal) &&
-        (text === '' || f.name.toLowerCase().includes(text) || f.description.toLowerCase().includes(text)),
+        (text === '' || frequencyName(f).toLowerCase().includes(text) || f.description.toLowerCase().includes(text)),
     );
   });
 
   readonly sessionItems = computed(() => {
-    const ids = this.session.ids();
-    return this.freq.items().filter((f) => ids.includes(f.id));
+    return this.session.items();
   });
 
-  readonly sessionMinutes = computed(() => this.sessionItems().reduce((sum, f) => sum + f.durationMin, 0));
+  readonly sessionMinutes = computed(() => this.session.totalDuration());
 
-  /** Classifica a sessão pela duração total. */
   readonly sessionLevel = computed(() => {
     const minutes = this.sessionMinutes();
     if (minutes === 0) return 'Nenhuma frequência escolhida';

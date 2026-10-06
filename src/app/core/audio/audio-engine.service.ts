@@ -1,167 +1,338 @@
-import { Injectable, computed, effect, signal } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
+import { Frequency, frequencyDurationMinutes, PlaybackMode } from '../models/frequency.model';
 
-export type SoundSpec =
-  | { kind: 'tone'; hz: number }
-  | { kind: 'noise'; color: 'white' | 'pink' | 'brown' }
-  | { kind: 'binaural'; carrierHz: number; beatHz: number };
-
-const VOLUME_KEY = 'resonate:volume';
-const LEVEL = 0.5; // nível de uma camada; dividido pelo nº de camadas
-
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root',
+})
 export class AudioEngine {
-  private ctx?: AudioContext;
-  private master?: GainNode;
-  private current?: { out: GainNode; sources: AudioScheduledSourceNode[] };
-  private noiseCache = new Map<string, AudioBuffer>();
+  private audioCtx: AudioContext | null = null;
+  private activeNodes: { sources: AudioScheduledSourceNode[]; gain: GainNode; volumeScale: number }[] = [];
+  private timerInterval: any = null;
+  private sessionQueue: Frequency[] = [];
+  private sessionQueueIndex = 0;
 
-  readonly volume = signal(this.loadVolume()); // 0..1
-  readonly muted = signal(false);
-  readonly playingKey = signal<string | null>(null);
-  readonly playingLabel = signal('');
-  readonly playing = computed(() => this.playingKey() !== null);
-
-  constructor() {
-    effect(() => {
-      const v = this.volume();
-      const m = this.muted();
-      this.saveVolume(v);
-      if (this.master && this.ctx) {
-        this.master.gain.setTargetAtTime(this.gainFor(v, m), this.ctx.currentTime, 0.03);
-      }
-    });
+  public playing = signal<boolean>(false);
+  public paused = signal<boolean>(false);
+  public previewingId = signal<string | null>(null);
+  public currentFrequencyIds = signal<string[]>([]);
+  public currentPresetId = signal<string | null>(null);
+  public currentPlaybackMode = signal<PlaybackMode>('sequential');
+  public queueLength = signal(0);
+  public queuePosition = signal(0);
+  public playingLabel = signal<string>('');
+  public volume = signal<number>(0.5);
+  public isMuted = signal<boolean>(false);
+  
+  public get muted() {
+    return this.isMuted;
   }
 
-  toggle(key: string, spec: SoundSpec | SoundSpec[], label: string): void {
-    if (this.playingKey() === key) this.stop();
-    else this.play(key, spec, label);
+  public remainingSeconds = signal<number>(0);
+  public durationSeconds = signal<number>(0);
+
+  public elapsedSeconds = computed(() => Math.max(0, this.durationSeconds() - this.remainingSeconds()));
+  public progressPercent = computed(() => {
+    const duration = this.durationSeconds();
+    return duration > 0 ? Math.min(100, (this.elapsedSeconds() / duration) * 100) : 0;
+  });
+
+  public formattedElapsedTime = computed(() => this.formatTime(this.elapsedSeconds()));
+  public formattedDuration = computed(() => this.formatTime(this.durationSeconds()));
+
+  public formattedTimeLeft = computed(() => {
+    return this.formatTime(this.remainingSeconds());
+  });
+
+  private formatTime(seconds: number): string {
+    const total = Math.max(0, Math.floor(seconds));
+    const mins = Math.floor(total / 60);
+    const secs = total % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
 
-  play(key: string, spec: SoundSpec | SoundSpec[], label: string): void {
+  private initContext() {
+    if (!this.audioCtx) {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      this.audioCtx = new AudioContextClass();
+    }
+    if (this.audioCtx.state === 'suspended') {
+      void this.audioCtx.resume();
+    }
+  }
+
+public play(
+  id: string,
+  config: { kind?: string; hz?: number; carrierHz?: number; beatHz?: number; color?: string; [key: string]: any },
+  label?: string
+) {
+  this.initContext();
+  this.stop();
+
+  this.playingLabel.set(label || id);
+  this.playing.set(true);
+  this.previewingId.set(id);
+  this.currentPlaybackMode.set('sequential');
+  this.queueLength.set(1);
+  this.queuePosition.set(1);
+
+  this.currentFrequencyIds.set([id]);
+  this.currentPresetId.set(null);
+  this.startTone(config.hz || config.carrierHz || 440, config.kind || 'tone', config.beatHz || 0);
+  this.startTimer(10);
+}
+
+  public previewFrequency(freq: Frequency) {
+    this.initContext();
     this.stop();
-    const ctx = this.ensure();
-    const specs = Array.isArray(spec) ? spec : [spec];
 
-    const out = ctx.createGain();
-    out.gain.setValueAtTime(0, ctx.currentTime);
-    out.gain.linearRampToValueAtTime(LEVEL / specs.length, ctx.currentTime + 0.4);
-    out.connect(this.master!);
+    const labelName = freq.name || freq.title || 'Frequência';
+    const soundType = freq.kind || freq.type || freq.category || 'Tom';
 
-    const sources = specs.flatMap((s) => this.layer(ctx, s, out));
-    sources.forEach((s) => s.start());
+    this.previewingId.set(freq.id);
+    this.playingLabel.set(`Pré-escuta: ${labelName}`);
+    this.playing.set(true);
+    this.currentPlaybackMode.set('sequential');
+    this.queueLength.set(1);
+    this.queuePosition.set(1);
 
-    this.current = { out, sources };
-    this.playingKey.set(key);
-    this.playingLabel.set(label);
+    this.currentFrequencyIds.set([freq.id]);
+    this.currentPresetId.set(null);
+    this.startTone(freq.hz, soundType, freq.beatHz || 0);
+    this.startTimer(10);
   }
 
-  stop(): void {
-    const cur = this.current;
-    if (!cur || !this.ctx) return;
-    const t = this.ctx.currentTime;
-    cur.out.gain.cancelScheduledValues(t);
-    cur.out.gain.setValueAtTime(cur.out.gain.value, t);
-    cur.out.gain.linearRampToValueAtTime(0, t + 0.3);
-    cur.sources.forEach((s) => s.stop(t + 0.35));
-    this.current = undefined;
-    this.playingKey.set(null);
-    this.playingLabel.set('');
+  public playFrequency(freq: Frequency) {
+    this.initContext();
+    this.stop();
+
+    const labelName = freq.name || freq.title || 'Frequência';
+    const soundType = freq.kind || freq.type || freq.category || 'Tom';
+    this.playingLabel.set(labelName);
+    this.playing.set(true);
+    this.currentPlaybackMode.set('sequential');
+    this.queueLength.set(1);
+    this.queuePosition.set(1);
+    this.currentFrequencyIds.set([freq.id]);
+    this.startTone(freq.hz, soundType, freq.beatHz || 0);
+    this.startTimer(frequencyDurationMinutes(freq) * 60 || 30 * 60);
   }
 
-  private ensure(): AudioContext {
-    if (!this.ctx) {
-      this.ctx = new AudioContext();
-      this.master = this.ctx.createGain();
-      this.master.gain.value = this.gainFor(this.volume(), this.muted());
-      this.master.connect(this.ctx.destination);
+  public playSession(
+    frequencies: Frequency[],
+    durationMinutes: number,
+    presetId: string | null = null,
+    mode: PlaybackMode = 'sequential',
+  ) {
+    if (frequencies.length === 0) return;
+    this.initContext();
+    this.stop();
+
+    this.playing.set(true);
+    this.previewingId.set(null);
+    this.currentPresetId.set(presetId);
+    this.currentPlaybackMode.set(mode);
+    this.queueLength.set(frequencies.length);
+
+    if (mode === 'sequential') {
+      this.sessionQueue = [...frequencies];
+      this.sessionQueueIndex = 0;
+      this.queuePosition.set(1);
+      this.startSessionTrack();
+      return;
     }
-    if (this.ctx.state === 'suspended') void this.ctx.resume();
-    return this.ctx;
+
+    this.currentFrequencyIds.set(frequencies.map((frequency) => frequency.id));
+    this.queuePosition.set(0);
+    this.playingLabel.set(frequencies.map((f) => f.name || f.title || 'Frequência').join(' + '));
+    const volumeScale = 1 / Math.sqrt(frequencies.length);
+    frequencies.forEach((frequency) => this.startFrequency(frequency, this.frequencySeconds(frequency), volumeScale));
+
+    const durationInSeconds = Math.max(
+      ...frequencies.map((frequency) => this.frequencySeconds(frequency)),
+      durationMinutes > 0 ? 0 : 30 * 60,
+    );
+    this.startTimer(durationInSeconds);
   }
 
-  // curva quadrática: o slider fica mais natural e os volumes baixos mais finos
-  private gainFor(v: number, muted: boolean): number {
-    return muted ? 0 : v * v;
+  private startSessionTrack() {
+    const frequency = this.sessionQueue[this.sessionQueueIndex];
+    if (!frequency) {
+      this.stop();
+      return;
+    }
+
+    this.currentFrequencyIds.set([frequency.id]);
+    this.playingLabel.set(frequency.name || frequency.title || 'Frequência');
+    this.startFrequency(frequency);
+    this.startTimer(this.frequencySeconds(frequency));
   }
 
-  private layer(ctx: AudioContext, spec: SoundSpec, out: GainNode): AudioScheduledSourceNode[] {
-    if (spec.kind === 'tone') {
-      const osc = ctx.createOscillator();
+  private advanceSessionTrack() {
+    this.stopActiveNodes();
+    this.sessionQueueIndex += 1;
+    this.queuePosition.set(this.sessionQueueIndex + 1);
+    this.startSessionTrack();
+  }
+
+  private startFrequency(frequency: Frequency, durationSeconds?: number, volumeScale = 1) {
+    const soundType = frequency.kind || frequency.type || frequency.category || 'Tom';
+    this.startTone(frequency.hz, soundType, frequency.beatHz || 0, durationSeconds, volumeScale);
+  }
+
+  private frequencySeconds(frequency: Frequency): number {
+    return (frequencyDurationMinutes(frequency) || 30) * 60;
+  }
+
+  private startTone(hz: number, type: string, beatHz = 0, durationSeconds?: number, volumeScale = 1) {
+    if (!this.audioCtx) return;
+
+    const masterGain = this.audioCtx.createGain();
+    const effectiveVolume = this.isMuted() ? 0 : this.volume();
+    masterGain.gain.setValueAtTime(effectiveVolume * 0.2 * volumeScale, this.audioCtx.currentTime);
+    masterGain.connect(this.audioCtx.destination);
+
+    const normalizedType = type.toLowerCase();
+    const isBinaural = normalizedType.includes('binaural');
+    const isNoise = normalizedType.includes('ruído') || normalizedType.includes('ruido') || normalizedType === 'noise';
+
+    if (isBinaural) {
+      const merger = this.audioCtx.createChannelMerger(2);
+      merger.connect(masterGain);
+      const left = this.audioCtx.createOscillator();
+      const right = this.audioCtx.createOscillator();
+      left.type = 'sine';
+      right.type = 'sine';
+      left.frequency.setValueAtTime(hz || 440, this.audioCtx.currentTime);
+      right.frequency.setValueAtTime((hz || 440) + beatHz, this.audioCtx.currentTime);
+      left.connect(merger, 0, 0);
+      right.connect(merger, 0, 1);
+      left.start();
+      right.start();
+      this.registerActiveNodes([left, right], masterGain, durationSeconds, volumeScale);
+    } else if (isNoise) {
+      const bufferSize = this.audioCtx.sampleRate * 2;
+      const buffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
+      const output = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1;
+      }
+
+      const whiteNoise = this.audioCtx.createBufferSource();
+      whiteNoise.buffer = buffer;
+      whiteNoise.loop = true;
+      const filter = this.audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(Math.min(hz || 1000, this.audioCtx.sampleRate / 2), this.audioCtx.currentTime);
+      whiteNoise.connect(filter);
+      filter.connect(masterGain);
+      whiteNoise.start();
+
+      this.registerActiveNodes([whiteNoise], masterGain, durationSeconds, volumeScale);
+    } else {
+      const osc = this.audioCtx.createOscillator();
       osc.type = 'sine';
-      osc.frequency.value = spec.hz;
-      osc.connect(out);
-      return [osc];
+      osc.frequency.setValueAtTime(hz || 440, this.audioCtx.currentTime);
+      osc.connect(masterGain);
+      osc.start();
+
+      this.registerActiveNodes([osc], masterGain, durationSeconds, volumeScale);
     }
-    if (spec.kind === 'noise') {
-      const src = ctx.createBufferSource();
-      src.buffer = this.noise(ctx, spec.color);
-      src.loop = true;
-      src.connect(out);
-      return [src];
+  }
+
+  private registerActiveNodes(
+    sources: AudioScheduledSourceNode[],
+    gain: GainNode,
+    durationSeconds?: number,
+    volumeScale = 1,
+  ) {
+    if (durationSeconds && this.audioCtx) {
+      const stopAt = this.audioCtx.currentTime + durationSeconds;
+      sources.forEach((source) => source.stop(stopAt));
     }
-    return [
-      { hz: spec.carrierHz, pan: -1 },
-      { hz: spec.carrierHz + spec.beatHz, pan: 1 },
-    ].map(({ hz, pan }) => {
-      const osc = ctx.createOscillator();
-      osc.frequency.value = hz;
-      const p = ctx.createStereoPanner();
-      p.pan.value = pan;
-      osc.connect(p).connect(out);
-      return osc;
+    this.activeNodes.push({ sources, gain, volumeScale });
+  }
+
+  public setVolume(val: number) {
+    const volume = Math.max(0, Math.min(1, val));
+    this.volume.set(volume);
+    this.activeNodes.forEach((node) => {
+      if (node.gain && this.audioCtx) {
+        const effectiveVolume = this.isMuted() ? 0 : volume;
+        node.gain.gain.setTargetAtTime(effectiveVolume * 0.2 * node.volumeScale, this.audioCtx.currentTime, 0.03);
+      }
     });
   }
 
-  private noise(ctx: AudioContext, color: 'white' | 'pink' | 'brown'): AudioBuffer {
-    let buf = this.noiseCache.get(color);
-    if (!buf) {
-      buf = this.noiseBuffer(ctx, color);
-      this.noiseCache.set(color, buf);
-    }
-    return buf;
+  public pause() {
+    if (!this.playing() || this.paused()) return;
+    this.paused.set(true);
+    this.stopTimer();
+    void this.audioCtx?.suspend();
   }
 
-    private noiseBuffer(ctx: AudioContext, color: 'white' | 'pink' | 'brown'): AudioBuffer {
-    const len = ctx.sampleRate * 4;
-    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
-    const d = buf.getChannelData(0);
-    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0, last = 0;
-    for (let i = 0; i < len; i++) {
-      const w = Math.random() * 2 - 1;
-      if (color === 'white') {
-        d[i] = w * 0.5;
-      } else if (color === 'pink') {
-        b0 = 0.99886 * b0 + w * 0.0555179;
-        b1 = 0.99332 * b1 + w * 0.0750759;
-        b2 = 0.969 * b2 + w * 0.153852;
-        b3 = 0.8665 * b3 + w * 0.3104856;
-        b4 = 0.55 * b4 + w * 0.5329522;
-        b5 = -0.7616 * b5 - w * 0.016898;
-        d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11;
-        b6 = w * 0.115926;
+  public resume() {
+    if (!this.playing() || !this.paused()) return;
+    this.paused.set(false);
+    void this.audioCtx?.resume();
+    this.startTimer(this.remainingSeconds(), false);
+  }
+
+  public toggleMute() {
+    const nextState = !this.isMuted();
+    this.isMuted.set(nextState);
+    this.setVolume(this.volume());
+  }
+
+  private startTimer(seconds: number, resetDuration = true) {
+    this.stopTimer();
+    this.remainingSeconds.set(seconds);
+    if (resetDuration) this.durationSeconds.set(seconds);
+
+    this.timerInterval = setInterval(() => {
+      const current = this.remainingSeconds();
+      if (current <= 1) {
+        if (this.currentPlaybackMode() === 'sequential' && this.sessionQueueIndex < this.sessionQueue.length - 1) {
+          this.advanceSessionTrack();
+        } else {
+          this.stop();
+        }
       } else {
-        last = (last + 0.02 * w) / 1.02;
-        d[i] = last * 3.5;
+        this.remainingSeconds.set(current - 1);
       }
-    }
-    return buf;
+    }, 1000);
   }
 
-  private loadVolume(): number {
-    try {
-      const raw = localStorage.getItem(VOLUME_KEY);
-      const n = raw === null ? NaN : Number(raw);
-      return Number.isFinite(n) ? Math.min(1, Math.max(0, n)) : 0.4;
-    } catch {
-      return 0.4;
+  private stopTimer() {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+      this.timerInterval = null;
     }
   }
 
-  private saveVolume(v: number): void {
-    try {
-      localStorage.setItem(VOLUME_KEY, String(v));
-    } catch {
-      /* armazenamento indisponível: ignora */
-    }
+  public stop() {
+    this.stopTimer();
+    this.stopActiveNodes();
+    this.sessionQueue = [];
+    this.sessionQueueIndex = 0;
+    this.playing.set(false);
+    this.paused.set(false);
+    this.previewingId.set(null);
+    this.currentFrequencyIds.set([]);
+    this.currentPresetId.set(null);
+    this.currentPlaybackMode.set('sequential');
+    this.queueLength.set(0);
+    this.queuePosition.set(0);
+    this.remainingSeconds.set(0);
+    this.durationSeconds.set(0);
+  }
+
+  private stopActiveNodes() {
+    this.activeNodes.forEach((node) => {
+      try {
+        node.sources.forEach((source) => source.stop());
+        node.gain.disconnect();
+      } catch (e) {}
+    });
+    this.activeNodes = [];
   }
 }

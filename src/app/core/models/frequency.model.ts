@@ -1,45 +1,63 @@
-export type Goal = 'foco' | 'relaxamento' | 'sono';
-export type Kind = 'binaural' | 'tom' | 'ruido';
+export type Goal = 'foco' | 'relaxamento' | 'sono' | 'meditacao' | 'cura' | 'todos' | string;
+export type PlaybackMode = 'sequential' | 'simultaneous';
 
-export interface Frequency {
-  id: string;
-  name: string;
-  goal: Goal;
-  kind: Kind;
-  /** Tom base em Hz (ou frequência de corte, no caso dos ruídos). */
-  hz: number;
-  /** Diferença entre os dois ouvidos, só nas binaurais. */
-  beatHz?: number;
-  durationMin: number;
-  /** Post do JSONPlaceholder usado para trazer notas da comunidade. */
-  communityPostId: number;
-  description: string;
-  benefits: string[];
+export const GOAL_LABELS: Record<string, string> = {
+  foco: 'Foco & Concentração',
+  relaxamento: 'Relaxamento',
+  sono: 'Sono Profundo',
+  meditacao: 'Meditação',
+  cura: 'Cura & Regeneração',
+  todos: 'Todas as Metas'
+};
+
+export const KIND_LABELS: Record<string, string> = {
+  binaural: 'Tom Binaural',
+  tom: 'Tom Puro / Isocrônico',
+  tone: 'Tom Puro',
+  noise: 'Ruído'
+};
+
+export interface CommunityNote {
+  id: string | number;
+  author?: string;
+  email?: string;
+  body?: string;
+  content?: string;
+  createdAt?: string;
 }
 
 export interface Preset {
   id: string;
-  name: string;
-  goal: Goal;
+  name?: string;
+  title?: string;
+  description?: string;
+  goal?: Goal;
   frequencyIds: string[];
-  active: boolean;
+  active?: boolean;
 }
 
-export interface CommunityNote {
-  id: number;
-  name: string;
-  email: string;
-  body: string;
+export interface Frequency {
+  id: string;
+  name?: string;
+  title?: string;
+  hz: number;
+  category: string;
+  description: string;
+  durationMinutes?: number;
+  duration?: number;
+  durationMin?: number;
+  type?: string;
+  kind?: 'binaural' | 'tom' | 'tone' | 'noise' | string;
+  beatHz?: number;
+  benefits?: string[];
+  communityPostId?: number;
+  goal?: Goal;
 }
 
-export const GOAL_LABELS: Record<Goal, string> = {
-  foco: 'Foco',
-  relaxamento: 'Relaxamento',
-  sono: 'Sono',
-};
+export function frequencyName(frequency: Frequency): string {
+  return frequency.name ?? frequency.title ?? '';
+}
 
-export const KIND_LABELS: Record<Kind, string> = {
-  binaural: 'Binaural',
-  tom: 'Tom puro',
-  ruido: 'Ruído',
-};
+export function frequencyDurationMinutes(frequency: Frequency): number {
+  return frequency.durationMin ?? frequency.durationMinutes ?? frequency.duration ?? 0;
+}
