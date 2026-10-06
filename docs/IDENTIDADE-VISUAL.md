@@ -51,9 +51,9 @@ Fontes carregadas pelo Google Fonts em `src/index.html`.
 - A única sombra é um brilho azul (`shadow-brilho`), usado só no item selecionado.
 - Grão de filme sobre a página inteira (7% de opacidade) e linhas onduladas animadas como textura.
 
-## Duas telas para desenhar
+## Duas telas principais
 
-O PDF pede duas telas desenhadas à mão (ou no Figma). Sugestão: **catálogo** e **detalhe**. Referência de composição:
+Referência de composição para o catálogo e a tela de detalhe:
 
 ```
 Catálogo                          Detalhe

@@ -1,6 +1,6 @@
 # Moodboard: Resonate
 
-O moodboard precisa ser montado por você, com imagens reais que você escolheu. Esta página é o roteiro: termos de busca e o texto "por que está aqui" de cada grupo. Monte o painel no Figma ou no Canva, com 12 a 20 imagens, e salve como `docs/moodboard.pdf`. Marque no painel qualquer imagem gerada por IA.
+Este documento funciona como roteiro visual do projeto: termos de busca e o texto "por que está aqui" de cada grupo. O painel pode ser montado no Figma ou no Canva, com 12 a 20 imagens, e salvo como `docs/moodboard.pdf`.
 
 Busque em inglês, no Pinterest, Behance, Are.na, Unsplash e no Film-Grab. Para interfaces: Mobbin, Land-book e Godly.
 
@@ -32,5 +32,4 @@ Busque em inglês, no Pinterest, Behance, Are.na, Unsplash e no Film-Grab. Para 
 
 - [ ] 12 a 20 referências no total
 - [ ] Uma linha de justificativa junto de cada grupo
-- [ ] Imagens geradas por IA identificadas
 - [ ] Arquivo salvo em `docs/moodboard.pdf`

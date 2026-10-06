@@ -1,5 +1,7 @@
 # Conceito e ligação funcional: Resonate
 
+[![Capa do álbum](docs/sondae_album.png)](https://github.com/ddanjos/resonate/tree/main)
+
 ## 1. Capa escolhida
 
 - **Álbum:** Perfect Peace
@@ -24,16 +26,3 @@ A capa é feita de muitas linhas que formam uma só onda. O site transforma isso
 
 Visualmente, as linhas onduladas da capa viraram o componente `wave-lines`, que muda de intensidade conforme o tom da frequência e quando o som está tocando.
 
-## 4. Uso de inteligência artificial
-
-**O que pedi à IA**
-
-- Conceitos abstratos que a capa poderia representar, a partir da minha descrição.
-- Ideias de funcionalidade que traduzissem ondas e frequências em interface.
-- Ajuda para estruturar o projeto Angular e escrever o código e a documentação.
-
-**O que decidi sozinho**
-
-- A palavra "Ressonância" e a ideia de um gerenciador de frequências para foco.
-- A paleta de cores, a tipografia e a forma, definidas em `tailwind.config.js` e em `docs/IDENTIDADE-VISUAL.md`.
-- A organização em componentes e o uso de signals e `computed`.

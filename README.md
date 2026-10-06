@@ -1,5 +1,7 @@
 # Resonate
 
+[![Resonate](docs/sondae_album.png)](https://github.com/ddanjos/resonate/tree/main)
+
 O Resonate é uma aplicação web em Angular para explorar frequências sonoras com foco em bem-estar, concentração, relaxamento e sono. A experiência combina catálogo de sons, reprodução em navegador, sessões personalizadas e presets salvos no próprio navegador.
 
 ## Visão geral
