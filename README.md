@@ -1,88 +1,142 @@
-# Resonate: frequências ambientes para foco, relaxamento e sono
+# Resonate
 
-O **Resonate** é uma SPA em Angular com Tailwind CSS, construída a partir do conceito de **Ressonância**, tirado de uma capa de álbum feita de linhas onduladas e paralelas.
+O Resonate é uma aplicação web em Angular para explorar frequências sonoras com foco em bem-estar, concentração, relaxamento e sono. A experiência combina catálogo de sons, reprodução em navegador, sessões personalizadas e presets salvos no próprio navegador.
 
-> Escolhi esta capa porque ela fala de ressonância e frequências fluidas, e por isso meu site é um gerenciador de frequências para foco e relaxamento.
+## Visão geral
 
-## Funcionalidades
+A aplicação foi pensada como uma SPA para ajudar o usuário a:
 
-- **Catálogo de frequências** com filtro por objetivo (Foco, Relaxamento, Sono) e busca por texto.
-- **Sessão de escuta**: o usuário escolhe tocar as frequências em sequência ou ao mesmo tempo; duração e classificação acompanham o modo selecionado.
-- **Página de detalhe** em `/detail/:id`, com dados técnicos, player e notas da comunidade.
-- **Som gerado no navegador** com a Web Audio API: tons puros, batidas binaurais (use fones) e ruídos filtrados. Não há arquivos de áudio.
-- **Presets**: formulário com validação para salvar combinações. Cada preset pode ser ativado ou pausado, e os totais mudam na hora.
-- **Página 404** com o visual do projeto.
+- descobrir frequências por objetivo e contexto;
+- montar uma sessão com múltiplas frequências;
+- ouvir sons gerados localmente com a Web Audio API;
+- salvar combinações favoritas em presets;
+- acompanhar o progresso da reprodução com indicadores visuais.
 
-## Tecnologias
+## Funcionalidades principais
 
-- Angular 19 (standalone components, signals, `input()`/`output()`, controle de fluxo `@if`/`@for`)
-- Tailwind CSS 3 + CSS próprio (grão de filme, animação das ondas)
+- Catálogo de frequências com filtros por objetivo
+- Busca por texto no catálogo
+- Página de detalhe para cada frequência
+- Reprodução de áudio no navegador, sem arquivos externos
+- Modo de reprodução sequencial e simultâneo
+- Sessão de escuta com duração e progresso
+- Presets salvos localmente com armazenamento em `localStorage`
+- Layout responsivo para desktop e mobile
+- Roteamento com páginas de home, detalhe, presets e 404
+
+## Stack tecnológica
+
+- Angular 19
 - TypeScript
-- Node.js e Angular CLI no Linux (Pop!_OS)
+- Tailwind CSS
+- Signals e computed values do Angular
+- RxJS
+- Web Audio API
 
-## Como rodar
+## Como executar
 
-Requisitos: Node.js 20 ou superior e Angular CLI (`npm i -g @angular/cli`).
+### Requisitos
+
+- Node.js 20+
+- npm
+
+### Instalação
 
 ```bash
-git clone https://github.com/ddanjos/resonate.git
 cd resonate
 npm install
+```
+
+### Desenvolvimento
+
+```bash
 npm start
 ```
 
-Abra `http://localhost:4200`. Para gerar a versão de produção: `npm run build` (saída em `dist/resonate`).
+A aplicação estará disponível em:
 
-## Estrutura
-
-```
-src/app/
-├── core/
-│   ├── models/frequency.model.ts      tipos e rótulos
-│   └── services/
-│       ├── frequency.service.ts       busca o catálogo (HttpClient)
-│       ├── community.service.ts       notas da API pública JSONPlaceholder
-│       ├── session.service.ts         sessão de escuta atual (signal)
-│       ├── preset.service.ts          presets salvos (signals + computed)
-│       └── audio-engine.service.ts    player global: prévias, sessões e presets (Web Audio API)
-├── shared/components/
-│   ├── navbar.component.ts            menu com destaque da rota atual
-│   ├── wave-lines.component.ts        linhas onduladas (input: lines, amplitude, height)
-│   ├── frequency-card.component.ts    input: freq | ações de sessão e rota de detalhe
-│   ├── goal-filter.component.ts       input: options, active | output: changed
-│   ├── stat-card.component.ts         input: label, value, hint
-│   └── state-message.component.ts     carregando, erro e vazio | output: retry
-└── pages/
-    ├── home/        catálogo, filtros e sessão
-    ├── detail/      /detail/:id
-    ├── presets/     formulário e lista de presets
-    └── not-found/   rota **
+```text
+http://localhost:4200
 ```
 
-## Requisitos do trabalho e onde estão
+### Build de produção
 
-| Requisito | Onde |
-|---|---|
-| 3+ rotas, menu com destaque | `app.routes.ts`, `navbar.component.ts` (`routerLinkActive`) |
-| Rota com parâmetro | `detail/:id`, lida com `input()` via `withComponentInputBinding` |
-| Rota `**` temática | `pages/not-found` |
-| 2+ componentes com `input()` | `frequency-card`, `goal-filter`, `stat-card`, `state-message`, `wave-lines` |
-| 1+ componente com `output()` | `frequency-card` (`toggle`), `goal-filter` (`changed`), `state-message` (`retry`) |
-| `@if`, `@for` com `track` e `@empty` | `home.page.html`, `detail.page.html`, `presets.page.html` |
-| Estado em signals | todos os serviços e páginas |
-| 3+ `computed` com trabalho real | `home.page.ts` (`filtered`, `sessionItems`, `sessionMinutes`, `sessionLevel`), `preset.service.ts` (`count`, `activeCount`, `activeMinutes`), `presets.page.ts` (`pickedItems`, `pickedMinutes`), `wave-lines` (`paths`) |
-| Serviço com `inject()` | `core/services/*` |
-| `HttpClient`, carregando e erro | `frequency.service.ts` e `community.service.ts`; telas usam `state-message` |
-| Formulário com validação | `presets.page.ts` (Reactive Forms; botão desabilitado enquanto inválido) |
-| Tailwind + CSS próprio | `tailwind.config.js` com as cores da identidade; `styles.css` com o grão |
-| Funciona no celular | layout em grid responsivo, menu que quebra linha |
+```bash
+npm run build
+```
 
-### Sobre a API
+A saída será gerada na pasta `dist/resonate`.
 
-Os dados das frequências ficam em `public/data/frequencies.json` e são buscados com `HttpClient`, porque não existe API pública de frequências terapêuticas. A API pública usada de verdade é o **JSONPlaceholder** (`/comments`), que alimenta as "Notas da comunidade" da página de detalhe. Esse arranjo deve ser combinado com o professor, como o enunciado pede quando a ideia não encaixa em uma API pronta.
+## Estrutura do projeto
 
-## Documentos de planejamento e design
+```text
+resonate/
+├── public/
+│   └── data/
+│       └── frequencies.json
+├── src/
+│   ├── app/
+│   │   ├── core/
+│   │   │   ├── audio/
+│   │   │   │   └── audio-engine.service.ts
+│   │   │   ├── models/
+│   │   │   │   └── frequency.model.ts
+│   │   │   └── services/
+│   │   │       ├── frequency.service.ts
+│   │   │       ├── preset.service.ts
+│   │   │       └── session.service.ts
+│   │   ├── pages/
+│   │   │   ├── detail/
+│   │   │   ├── home/
+│   │   │   ├── not-found/
+│   │   │   └── presets/
+│   │   ├── shared/
+│   │   │   └── components/
+│   │   ├── app.component.ts
+│   │   ├── app.config.ts
+│   │   └── app.routes.ts
+│   ├── index.html
+│   ├── main.ts
+│   └── styles.css
+├── angular.json
+├── package.json
+├── tailwind.config.js
+├── tsconfig.json
+├── README.md
+├── CONCEITO.md
+├── docs/
+│   ├── IDENTIDADE-VISUAL.md
+│   └── MOODBOARD.md
+└── apresentacao.html
+```
 
-- [CONCEITO.md](./CONCEITO.md): capa, palavra-conceito e ligação funcional
-- [docs/MOODBOARD.md](./docs/MOODBOARD.md): roteiro do moodboard (o painel final vai em `docs/moodboard.pdf`)
-- [docs/IDENTIDADE-VISUAL.md](./docs/IDENTIDADE-VISUAL.md): paleta, tipografia, forma e frase de direção
+## Fluxo de uso
+
+1. O usuário acessa a home e navega pelo catálogo.
+2. Filtra frequências por objetivo ou pesquisa por termos.
+3. Adiciona frequências à sessão atual.
+4. Escolhe o modo de reprodução: sequencial ou simultâneo.
+5. Inicia a reprodução e acompanha o tempo restante e progresso.
+6. Salva combinações como preset para reutilização posterior.
+
+## Dados e integrações
+
+- O catálogo principal de frequências está em `public/data/frequencies.json`.
+- As notas da comunidade na página de detalhe podem ser alimentadas via API pública, como JSONPlaceholder.
+- Os presets são persistidos no navegador usando `localStorage`, permitindo que a experiência continue mesmo após recarregar a página.
+
+## Observações de uso
+
+- Para melhor experiência, sons binaurais são mais perceptíveis com headphones.
+- A geração de áudio ocorre totalmente no navegador, sem depender de arquivos de áudio estáticos.
+- A lógica principal de áudio está centralizada no serviço `AudioEngine` e é reutilizada pela sessão e pelos presets.
+
+## Documentação complementar
+
+- [CONCEITO.md](./CONCEITO.md)
+- [docs/IDENTIDADE-VISUAL.md](./docs/IDENTIDADE-VISUAL.md)
+- [docs/MOODBOARD.md](./docs/MOODBOARD.md)
+
+## Status do projeto
+
+Este README foi atualizado para refletir a versão atual da aplicação e seus recursos em funcionamento, substituindo a documentação inicial mais antiga do projeto.
