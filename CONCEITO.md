@@ -4,7 +4,7 @@
 
 - **Álbum:** Perfect Peace
 - **Artista:** sondae
-- **Imagem:** https://i.scdn.co/image/ab67616d0000b2737a18e6c7014695b2110c73e8
+- **Imagem:** resonate/docs/sondae_album.png
 
 A capa não aparece dentro do site, e o nome do álbum não foi usado como nome do projeto.
 
