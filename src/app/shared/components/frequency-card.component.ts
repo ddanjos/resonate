@@ -10,7 +10,7 @@ import { AudioEngine } from '../../core/audio/audio-engine.service';
   imports: [RouterLink],
   styles: ':host { display: block; height: 100%; }',
   template: `
-    <div class="flex h-full flex-col justify-between rounded-xl border border-borda bg-superficie/80 p-5 transition-colors hover:border-destaque/50">
+    <div class="frequency-card flex h-full flex-col justify-between rounded-xl border border-borda bg-superficie/80 p-5 hover:border-destaque/50">
       <div>
         <div class="flex items-center justify-between gap-2">
           <a [routerLink]="['/detail', freq().id]" class="font-semibold text-texto transition-colors hover:text-destaque">

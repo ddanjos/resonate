@@ -56,6 +56,30 @@ body::after {
   animation: frequency-glow 2s infinite ease-in-out;
 }
 
+@keyframes resonance-breathe {
+  0%, 100% { opacity: 0.12; transform: scale(0.96); }
+  50% { opacity: 0.3; transform: scale(1.04); }
+}
+
+.resonance-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -5;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 78% 42%, rgba(141, 227, 255, 0.22), transparent 55%);
+  animation: resonance-breathe 12s ease-in-out infinite;
+}
+
+.frequency-card {
+  transition: transform 240ms ease, border-color 240ms ease, box-shadow 240ms ease;
+}
+
+.frequency-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -24px rgba(141, 227, 255, 0.8);
+}
+
 @keyframes player-enter {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
@@ -70,7 +94,15 @@ body::after {
   .animate-bar-1,
   .animate-bar-2,
   .animate-bar-3,
-  .playing-card-glow {
+  .playing-card-glow,
+  .resonance-hero::after {
     animation: none;
+  }
+
+  .frequency-card,
+  .frequency-card:hover {
+    transform: none;
+    transition: none;
+    box-shadow: none;
   }
 }
