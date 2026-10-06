@@ -37,5 +37,3 @@ Visualmente, as linhas onduladas da capa viraram o componente `wave-lines`, que 
 - A palavra "Ressonância" e a ideia de um gerenciador de frequências para foco.
 - A paleta de cores, a tipografia e a forma, definidas em `tailwind.config.js` e em `docs/IDENTIDADE-VISUAL.md`.
 - A organização em componentes e o uso de signals e `computed`.
-
-> Antes de entregar: revise este texto com as suas palavras. No dia da apresentação, o que vale é o que você sabe explicar.
