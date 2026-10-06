@@ -68,5 +68,3 @@ Catálogo                          Detalhe
 | [card] [card] [card]      |     | notas da comunidade       |
 +---------------------------+     +---------------------------+
 ```
-
-Fotografe os desenhos e salve em `docs/telas.jpg`.
