@@ -53,14 +53,6 @@
         </p>
       </div>
 
-      <div class="mb-6 flex h-14 items-center gap-4 overflow-hidden border-y border-borda/70" aria-label="Visualização da frequência de 432 hertz">
-        <span class="shrink-0 font-mono text-xs text-onda">432 Hz</span>
-        <div class="h-full min-w-0 flex-1 opacity-75" aria-hidden="true">
-          <app-wave-lines [lines]="34" [amplitude]="20" [height]="100" />
-        </div>
-        <span class="shrink-0 text-[10px] uppercase tracking-[0.14em] text-suave">Sinal</span>
-      </div>
-
       <div class="mb-6 grid grid-cols-2 rounded-full border border-borda bg-fundo/70 p-1" role="tablist" aria-label="Acesso à conta">
         <button
           type="button"
@@ -88,14 +80,16 @@
         @if (mode() === 'register') {
           <div>
             <label for="name" class="block text-sm text-texto/90">Como podemos chamar você?</label>
-            <input
-              id="name"
-              type="text"
-              formControlName="name"
-              autocomplete="name"
-              placeholder="Seu nome"
-              class="mt-2 w-full rounded-xl border border-borda bg-superficie/70 px-4 py-3 text-sm text-texto placeholder:text-suave/70 focus:border-destaque focus:outline-none"
-            />
+            <div class="auth-input-frame mt-2" [class.auth-input-error]="form.controls.name.touched && form.controls.name.invalid">
+              <input
+                id="name"
+                type="text"
+                formControlName="name"
+                autocomplete="name"
+                placeholder="Seu nome"
+                class="auth-input w-full rounded-xl border border-borda bg-superficie/70 px-4 py-3 text-sm text-texto placeholder:text-suave/70 focus:border-transparent focus:outline-none focus-visible:outline-none"
+              />
+            </div>
             @if (form.controls.name.touched && form.controls.name.invalid) {
               <p class="mt-1.5 text-xs text-erro" role="alert">Informe um nome com pelo menos 2 caracteres.</p>
             }
@@ -104,15 +98,16 @@
 
         <div>
           <label for="email" class="block text-sm text-texto/90">E-mail</label>
-          <input
-            id="email"
-            type="email"
-            formControlName="email"
-            autocomplete="email"
-            placeholder="voce@exemplo.com"
-            class="mt-2 w-full rounded-xl border border-borda bg-superficie/70 px-4 py-3 text-sm text-texto placeholder:text-suave/70 focus:border-destaque focus:outline-none"
-            [class.border-erro]="form.controls.email.touched && form.controls.email.invalid"
-          />
+          <div class="auth-input-frame mt-2" [class.auth-input-error]="form.controls.email.touched && form.controls.email.invalid">
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              autocomplete="email"
+              placeholder="voce@exemplo.com"
+              class="auth-input w-full rounded-xl border border-borda bg-superficie/70 px-4 py-3 text-sm text-texto placeholder:text-suave/70 focus:border-transparent focus:outline-none focus-visible:outline-none"
+            />
+          </div>
           @if (form.controls.email.touched && form.controls.email.invalid) {
             <p class="mt-1.5 text-xs text-erro" role="alert">Digite um endereço de e-mail válido.</p>
           }
@@ -127,19 +122,18 @@
               </button>
             }
           </div>
-          <div class="relative mt-2">
+          <div class="auth-input-frame mt-2" [class.auth-input-error]="form.controls.password.touched && form.controls.password.invalid">
             <input
               id="password"
               [type]="showPassword() ? 'text' : 'password'"
               formControlName="password"
               [attr.autocomplete]="mode() === 'login' ? 'current-password' : 'new-password'"
               placeholder="Mínimo de 8 caracteres"
-              class="w-full rounded-xl border border-borda bg-superficie/70 px-4 py-3 pr-20 text-sm text-texto placeholder:text-suave/70 focus:border-destaque focus:outline-none"
-              [class.border-erro]="form.controls.password.touched && form.controls.password.invalid"
+              class="auth-input w-full rounded-xl border border-borda bg-superficie/70 px-4 py-3 pr-20 text-sm text-texto placeholder:text-suave/70 focus:border-transparent focus:outline-none focus-visible:outline-none"
             />
             <button
               type="button"
-              class="absolute inset-y-0 right-3 text-xs text-suave transition-colors hover:text-onda"
+              class="absolute inset-y-0 right-3 z-10 text-xs text-suave transition-colors hover:text-onda"
               [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
               (click)="togglePassword()"
             >

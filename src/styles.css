@@ -23,6 +23,16 @@
   }
 }
 
+@property --auth-border-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes auth-border-orbit {
+  to { --auth-border-angle: 360deg; }
+}
+
 /* Grão de filme sobre a página inteira: textura da identidade visual */
 body::after {
   content: '';
