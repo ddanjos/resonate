@@ -17,6 +17,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/presets/presets.page').then((m) => m.PresetsPage),
   },
   {
+    path: 'login',
+    title: 'Resonate · Acessar conta',
+    loadComponent: () => import('./pages/auth/auth.page').then((m) => m.AuthPage),
+  },
+  {
     path: '**',
     title: 'Resonate · Página não encontrada',
     loadComponent: () => import('./pages/not-found/not-found.page').then((m) => m.NotFoundPage),

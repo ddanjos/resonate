@@ -1,0 +1,176 @@
+<section class="auth-scene relative isolate grid overflow-hidden rounded-onda border border-borda bg-superficie/40 lg:grid-cols-[1.08fr_0.92fr]">
+  <div class="auth-art relative flex min-h-72 flex-col justify-between overflow-hidden p-7 sm:p-10 lg:min-h-[680px] lg:p-12">
+    <div class="pointer-events-none absolute inset-0 -z-10 opacity-55">
+      <app-wave-lines [lines]="48" [amplitude]="32" [height]="300" />
+    </div>
+    <div class="pointer-events-none absolute inset-0 -z-20 bg-[radial-gradient(ellipse_at_26%_55%,rgba(47,111,214,0.2),transparent_62%)]"></div>
+
+    <a routerLink="/" class="inline-flex w-fit items-center gap-2 font-titulo text-lg font-semibold text-texto">
+      <span class="flex h-8 w-8 items-center justify-center rounded-full border border-onda/35 bg-onda/10 text-onda" aria-hidden="true">r</span>
+      Resonate
+    </a>
+
+    <div class="relative max-w-lg py-10">
+      <p class="mb-4 flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-onda">
+        <span class="h-px w-7 bg-onda/70" aria-hidden="true"></span>
+        Um espaço no seu ritmo
+      </p>
+      <h1 class="font-titulo text-3xl font-semibold leading-tight text-texto sm:text-4xl">
+        Volte para a frequência que faz bem.
+      </h1>
+      <p class="mt-4 max-w-md text-sm leading-6 text-suave sm:text-base">
+        Suas sessões, combinações e momentos de foco, reunidos em um só lugar.
+      </p>
+    </div>
+
+    <div class="flex items-end justify-between gap-4 border-t border-borda/70 pt-5">
+      <div>
+        <p class="text-[11px] uppercase tracking-[0.16em] text-suave">Sintonizado em</p>
+        <p class="mt-1 font-mono text-sm text-texto">432 <span class="text-onda">Hz</span></p>
+      </div>
+      <div class="flex h-8 items-center gap-1.5 opacity-80" aria-hidden="true">
+        <span class="h-2 w-px rounded-full bg-onda/50"></span>
+        <span class="h-4 w-px rounded-full bg-onda/70"></span>
+        <span class="h-7 w-px rounded-full bg-onda"></span>
+        <span class="h-5 w-px rounded-full bg-onda/80"></span>
+        <span class="h-3 w-px rounded-full bg-onda/60"></span>
+        <span class="h-6 w-px rounded-full bg-onda/90"></span>
+        <span class="h-2 w-px rounded-full bg-onda/50"></span>
+      </div>
+      <p class="hidden text-right text-xs leading-5 text-suave sm:block">Respire.<br />Encontre seu ritmo.</p>
+    </div>
+  </div>
+
+  <div class="flex items-center border-t border-borda bg-fundo/55 px-6 py-9 backdrop-blur-sm sm:px-10 lg:border-l lg:border-t-0 lg:px-12">
+    <div class="mx-auto w-full max-w-md">
+      <div class="mb-8">
+        <p class="text-sm text-onda">Bem-vindo ao Resonate</p>
+        <h2 class="mt-2 font-titulo text-2xl font-semibold text-texto sm:text-3xl">
+          {{ mode() === 'login' ? 'Entre em sintonia' : 'Crie seu espaço' }}
+        </h2>
+        <p class="mt-2 text-sm text-suave">
+          {{ mode() === 'login' ? 'Acesse sua conta para continuar.' : 'Comece a guardar suas frequências favoritas.' }}
+        </p>
+      </div>
+
+      <div class="mb-6 flex h-14 items-center gap-4 overflow-hidden border-y border-borda/70" aria-label="Visualização da frequência de 432 hertz">
+        <span class="shrink-0 font-mono text-xs text-onda">432 Hz</span>
+        <div class="h-full min-w-0 flex-1 opacity-75" aria-hidden="true">
+          <app-wave-lines [lines]="34" [amplitude]="20" [height]="100" />
+        </div>
+        <span class="shrink-0 text-[10px] uppercase tracking-[0.14em] text-suave">Sinal</span>
+      </div>
+
+      <div class="mb-6 grid grid-cols-2 rounded-full border border-borda bg-fundo/70 p-1" role="tablist" aria-label="Acesso à conta">
+        <button
+          type="button"
+          role="tab"
+          [attr.aria-selected]="mode() === 'login'"
+          (click)="setMode('login')"
+          class="rounded-full px-3 py-2 text-sm transition-colors"
+          [class]="mode() === 'login' ? 'bg-destaque/15 text-destaque' : 'text-suave hover:text-texto'"
+        >
+          Entrar
+        </button>
+        <button
+          type="button"
+          role="tab"
+          [attr.aria-selected]="mode() === 'register'"
+          (click)="setMode('register')"
+          class="rounded-full px-3 py-2 text-sm transition-colors"
+          [class]="mode() === 'register' ? 'bg-destaque/15 text-destaque' : 'text-suave hover:text-texto'"
+        >
+          Criar conta
+        </button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4" novalidate>
+        @if (mode() === 'register') {
+          <div>
+            <label for="name" class="block text-sm text-texto/90">Como podemos chamar você?</label>
+            <input
+              id="name"
+              type="text"
+              formControlName="name"
+              autocomplete="name"
+              placeholder="Seu nome"
+              class="mt-2 w-full rounded-xl border border-borda bg-superficie/70 px-4 py-3 text-sm text-texto placeholder:text-suave/70 focus:border-destaque focus:outline-none"
+            />
+            @if (form.controls.name.touched && form.controls.name.invalid) {
+              <p class="mt-1.5 text-xs text-erro" role="alert">Informe um nome com pelo menos 2 caracteres.</p>
+            }
+          </div>
+        }
+
+        <div>
+          <label for="email" class="block text-sm text-texto/90">E-mail</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            autocomplete="email"
+            placeholder="voce@exemplo.com"
+            class="mt-2 w-full rounded-xl border border-borda bg-superficie/70 px-4 py-3 text-sm text-texto placeholder:text-suave/70 focus:border-destaque focus:outline-none"
+            [class.border-erro]="form.controls.email.touched && form.controls.email.invalid"
+          />
+          @if (form.controls.email.touched && form.controls.email.invalid) {
+            <p class="mt-1.5 text-xs text-erro" role="alert">Digite um endereço de e-mail válido.</p>
+          }
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between gap-3">
+            <label for="password" class="block text-sm text-texto/90">Senha</label>
+            @if (mode() === 'login') {
+              <button type="button" class="text-xs text-suave transition-colors hover:text-onda" (click)="notice.set('A recuperação de senha estará disponível quando a autenticação for conectada.')">
+                Esqueceu a senha?
+              </button>
+            }
+          </div>
+          <div class="relative mt-2">
+            <input
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              [attr.autocomplete]="mode() === 'login' ? 'current-password' : 'new-password'"
+              placeholder="Mínimo de 8 caracteres"
+              class="w-full rounded-xl border border-borda bg-superficie/70 px-4 py-3 pr-20 text-sm text-texto placeholder:text-suave/70 focus:border-destaque focus:outline-none"
+              [class.border-erro]="form.controls.password.touched && form.controls.password.invalid"
+            />
+            <button
+              type="button"
+              class="absolute inset-y-0 right-3 text-xs text-suave transition-colors hover:text-onda"
+              [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
+              (click)="togglePassword()"
+            >
+              {{ showPassword() ? 'Ocultar' : 'Mostrar' }}
+            </button>
+          </div>
+          @if (form.controls.password.touched && form.controls.password.invalid) {
+            <p class="mt-1.5 text-xs text-erro" role="alert">A senha precisa ter pelo menos 8 caracteres.</p>
+          }
+        </div>
+
+        <button
+          type="submit"
+          class="mt-2 w-full rounded-full bg-destaque px-5 py-3 text-sm font-semibold text-fundo transition-colors hover:bg-onda focus-visible:outline-offset-4"
+        >
+          {{ mode() === 'login' ? 'Entrar na minha conta' : 'Criar minha conta' }}
+        </button>
+
+        @if (notice()) {
+          <p class="rounded-xl border border-onda/20 bg-onda/5 px-4 py-3 text-xs leading-5 text-onda" role="status">
+            {{ notice() }}
+          </p>
+        }
+      </form>
+
+      <p class="mt-7 text-center text-xs leading-5 text-suave">
+        Ao continuar, você concorda com nossos termos de uso e política de privacidade.
+      </p>
+      <a routerLink="/" class="mt-6 inline-flex w-full justify-center text-sm text-suave transition-colors hover:text-texto">
+        Voltar ao catálogo
+      </a>
+    </div>
+  </div>
+</section>

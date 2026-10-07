@@ -34,5 +34,6 @@ export class NavbarComponent {
   readonly links = [
     { path: '/', label: 'Catálogo', exact: true },
     { path: '/presets', label: 'Presets', exact: false },
+    { path: '/login', label: 'Entrar', exact: false },
   ];
 }
